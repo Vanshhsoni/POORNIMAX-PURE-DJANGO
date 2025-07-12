@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PoornimaX</title>
+    <style>
+        :root {
+            --primary: #6c63ff;
+            --primary-light: #8f88ff;
+            --primary-dark: #5046e5;
+            --secondary: #ff6584;
+            --secondary-light: #ff85a2;
+            --bg: #f5f5f7;
+            --bg-card: #ffffff;
+            --bg-dark: #1f1f30;
+            --text: #333333;
+            --text-light: #787878;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --radius: 12px;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background: radial-gradient(circle, var(--bg) 30%, #e8e8e8 100%);
+            color: var(--text);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Loading Screen */
+        .loader-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.6s ease-in-out, visibility 0.6s ease-in-out;
+        }
+
+        .loader {
+            width: 80px;
+            height: 40px;
+            display: flex;
+        }
+
+        .loader:before,
+        .loader:after {
+            content: "";
+            margin: 0 -2px 0 0;
+            flex: 1;
+            --c: no-repeat linear-gradient(var(--primary) 0 0);
+            background: var(--c), var(--c), var(--c), var(--c);
+            animation: l13-1 1s infinite linear, l13-2 1s infinite linear;
+        }
+
+        .loader:after {
+            transform: scale(-1);
+            margin: 0 0 0 -2px;
+        }
+
+        @keyframes l13-1 {
+            0%, 3%   {background-size: 0 4px, 4px 0, 0 4px, 4px 0;}
+            12.5%    {background-size: 50% 4px, 4px 0, 0 4px, 4px 0;}
+            25%      {background-size: 50% 4px, 4px 50%, 0 4px, 4px 0;}
+            37.5%    {background-size: 50% 4px, 4px 50%, 50% 4px, 4px 0;}
+            46%, 54% {background-size: 50% 4px, 4px 50%, 50% 4px, 4px 50%;}
+            62.5%    {background-size: 0 4px, 4px 50%, 50% 4px, 4px 50%;}
+            75%      {background-size: 0 4px, 4px 0, 50% 4px, 4px 50%;}
+            87.5%    {background-size: 0 4px, 4px 0, 0 4px, 4px 50%;}
+            96%,100% {background-size: 0 4px, 4px 0, 0 4px, 4px 0;}
+        }
+
+        @keyframes l13-2 {
+            0%,49.9%  {background-position: 0 20px, 50% 20px, 20px 100%, 100% 100%;}
+            50%,100%  {background-position: right 20px top 20px, 50% 100%, 100% 100%, 100% 20px;}
+        }
+
+        /* Particle Background */
+        #particles-js {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.5;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            border-bottom: 1px solid rgba(108, 99, 255, 0.2);
+            position: relative;
+        }
+
+        header h1 {
+            background: linear-gradient(45deg, var(--primary), var(--primary-light));
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            font-size: 2.5rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+        }
+
+        .header-subtitle {
+            color: var(--text-light);
+            font-style: italic;
+            margin-top: 5px;
+            font-size: 1rem;
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 900px;
+            margin: 20px auto 80px;
+            padding: 0 20px;
+        }
+
+        /* Section Styles */
+        .section {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: 0 10px 30px var(--shadow);
+            padding: 30px;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(108, 99, 255, 0.15);
+        }
+
+        .section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--primary), var(--secondary));
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            color: var(--primary-dark);
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-icon {
+            width: 30px;
+            height: 30px;
+            fill: var(--primary);
+        }
+
+        /* Question Styles */
+        .question {
+            background: rgba(245, 245, 247, 0.5);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: var(--transition);
+        }
+
+        .question:hover {
+            background: rgba(245, 245, 247, 0.9);
+        }
+
+        .question-title {
+            font-size: 1.2rem;
+            color: var(--text);
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        /* Input Styles */
+        .text-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: var(--transition);
+            margin-top: 5px;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(108, 99, 255, 0.2);
+        }
+
+        /* Radio Options */
+        .options {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .radio-option {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .radio-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .radio-label {
+            display: block;
+            padding: 10px 15px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            transition: var(--transition);
+            font-size: 0.95rem;
+        }
+
+        .radio-option input[type="radio"]:checked + .radio-label {
+            background: rgba(108, 99, 255, 0.1);
+            border-color: var(--primary);
+            color: var(--primary-dark);
+            font-weight: 500;
+        }
+
+        .radio-option input[type="radio"]:focus + .radio-label {
+            box-shadow: 0 0 0 2px rgba(108, 99, 255, 0.3);
+        }
+
+        .radio-label:hover {
+            border-color: var(--primary-light);
+        }
+
+        /* Submit Button */
+        .submit-container {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .submit-btn {
+            background: linear-gradient(45deg, var(--primary-dark), var(--primary));
+            color: white;
+            padding: 14px 40px;
+            border-radius: 30px;
+            border: none;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.3);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(108, 99, 255, 0.5);
+        }
+
+        /* Footer */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: linear-gradient(90deg, var(--primary-dark), var(--primary));
+            color: white;
+            text-align: center;
+            padding: 15px 0;
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: 3px;
+            box-shadow: 0 -5px 20px rgba(108, 99, 255, 0.2);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .options {
+                grid-template-columns: 1fr;
+            }
+            
+            .section {
+                padding: 20px;
+            }
+            
+            .section-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Loading Screen -->
+    <div class="loader-container">
+        <div class="loader"></div>
+    </div>
+
+    <!-- Particle Background -->
+    <div id="particles-js"></div>
+
+    <header>
+        <h1>PoornimaX</h1>
+        <div class="header-subtitle">Let's find your perfect connection</div>
+    </header>
+
+    <div class="main-container">
+        <form method="POST" action="{% url 'accounts:questionnaire_view' %}">
+            {% csrf_token %}
+            
+            <!-- Interests Section -->
+            <!-- Interests Section -->
+<div class="section" id="interests-section">
+    <h2 class="section-title">
+        <svg class="section-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zm0-2a8 8 0 100-16 8 8 0 000 16zm-1-5h2v2h-2v-2zm0-8h2v6h-2V7z"/>
+        </svg>
+        Tell Us About You
+    </h2>
+    
+    <div class="question">
+        <label class="question-title">What are your favorite hobbies?</label>
+        <p class="question-subtitle">Select all that apply</p>
+        <div class="checkbox-options">
+            <!-- Hobbies from the model -->
+            <label class="checkbox-option">
+                <input type="checkbox" name="hobbies" value="Photography">
+                <span class="checkbox-label">Photography</span>
+            </label>
+            <label class="checkbox-option">
+                <input type="checkbox" name="hobbies" value="Coding">
+                <span class="checkbox-label">Coding</span>
+            </label>
+            <label class="checkbox-option">
+                <input type="checkbox" name="hobbies" value="Gaming">
+                <span class="checkbox-label">Gaming</span>
+            </label>
+            <label class="checkbox-option">
+                <input type="checkbox" name="hobbies" value="Editing">
+                <span class="checkbox-label">Editing</span>
+            </label>
+            <label class="checkbox-option">
+                <input type="checkbox" name="hobbies" value="Designing">
+                <span class="checkbox-label">Designing</span>
+            </label>
+            <label class="checkbox-option">
+                <input type="checkbox" name="hobbies" value="Reading">
+                <span class="checkbox-label">Reading</span>
+            </label>
+            <label class="checkbox-option">
+                <input type="checkbox" name="hobbies" value="Music">
+                <span class="checkbox-label">Music</span>
+            </label>
+            <label class="checkbox-option">
+                <input type="checkbox" name="hobbies" value="Cooking">
+                <span class="checkbox-label">Cooking</span>
+            </label>
+            <label class="checkbox-option">
+                <input type="checkbox" name="hobbies" value="Traveling">
+                <span class="checkbox-label">Traveling</span>
+            </label>
+            <label class="checkbox-option">
+                <input type="checkbox" name="hobbies" value="Dancing">
+                <span class="checkbox-label">Dancing</span>
+            </label>
+            <label class="checkbox-option">
+                <input type="checkbox" name="hobbies" value="Singing">
+                <span class="checkbox-label">Singing</span>
+            </label>
+            <label class="checkbox-option">
+                <input type="checkbox" name="hobbies" value="Painting">
+                <span class="checkbox-label">Painting</span>
+            </label>
+            <label class="checkbox-option">
+                <input type="checkbox" name="hobbies" value="Fitness">
+                <span class="checkbox-label">Fitness</span>
+            </label>
+            <label class="checkbox-option">
+                <input type="checkbox" name="hobbies" value="Sports">
+                <span class="checkbox-label">Sports</span>
+            </label>
+            <label class="checkbox-option">
+                <input type="checkbox" name="hobbies" value="Hiking">
+                <span class="checkbox-label">Hiking</span>
+            </label>
+            <label class="checkbox-option">
+                <input type="checkbox" name="hobbies" value="Movies">
+                <span class="checkbox-label">Movies</span>
+            </label>
+            <label class="checkbox-option">
+                <input type="checkbox" name="hobbies" value="Anime">
+                <span class="checkbox-label">Anime</span>
+            </label>
+            <label class="checkbox-option">
+                <input type="checkbox" name="hobbies" value="Writing">
+                <span class="checkbox-label">Writing</span>
+            </label>
+            <label class="checkbox-option">
+                <input type="checkbox" name="hobbies" value="Driving">
+                <span class="checkbox-label">Driving</span>
+            </label>
+        </div>
+    </div>
+    
+    <div class="question">
+        <label class="question-title">Which college events do you enjoy the most?</label>
+        <p class="question-subtitle">Select all that apply</p>
+        <div class="checkbox-options">
+            <!-- College events from the model -->
+            <label class="checkbox-option">
+                <input type="checkbox" name="college_events" value="Tech Fests">
+                <span class="checkbox-label">Tech Fests</span>
+            </label>
+            <label class="checkbox-option">
+                <input type="checkbox" name="college_events" value="Cultural Nights">
+                <span class="checkbox-label">Cultural Nights</span>
+            </label>
+            <label class="checkbox-option">
+                <input type="checkbox" name="college_events" value="Hackathons">
+                <span class="checkbox-label">Hackathons</span>
+            </label>
+            <label class="checkbox-option">
+                <input type="checkbox" name="college_events" value="Workshops">
+                <span class="checkbox-label">Workshops</span>
+            </label>
+            <label class="checkbox-option">
+                <input type="checkbox" name="college_events" value="Sports Competitions">
+                <span class="checkbox-label">Sports Competitions</span>
+            </label>
+            <label class="checkbox-option">
+                <input type="checkbox" name="college_events" value="Seminars">
+                <span class="checkbox-label">Seminars</span>
+            </label>
+            <label class="checkbox-option">
+                <input type="checkbox" name="college_events" value="Club Activities">
+                <span class="checkbox-label">Club Activities</span>
+            </label>
+            <label class="checkbox-option">
+                <input type="checkbox" name="college_events" value="Conferences">
+                <span class="checkbox-label">Conferences</span>
+            </label>
+            <label class="checkbox-option">
+                <input type="checkbox" name="college_events" value="Competitions">
+                <span class="checkbox-label">Competitions</span>
+            </label>
+            <label class="checkbox-option">
+                <input type="checkbox" name="college_events" value="Social Gatherings">
+                <span class="checkbox-label">Social Gatherings</span>
+            </label>
+            <label class="checkbox-option">
+                <input type="checkbox" name="college_events" value="Debates">
+                <span class="checkbox-label">Debates</span>
+            </label>
+        </div>
+    </div>
+    
+    <div class="question">
+        <label class="question-title">How do you typically spend your weekends?</label>
+        <p class="question-subtitle">Select all that apply</p>
+        <div class="checkbox-options">
+            <!-- Weekend activities from the model -->
+            <label class="checkbox-option">
+                <input type="checkbox" name="weekend_plans" value="City exploration">
+                <span class="checkbox-label">City exploration</span>
+            </label>
+            <label class="checkbox-option">
+                <input type="checkbox" name="weekend_plans" value="Movie marathons">
+                <span class="checkbox-label">Movie marathons</span>
+            </label>
+            <label class="checkbox-option">
+                <input type="checkbox" name="weekend_plans" value="Coffee shop work">
+                <span class="checkbox-label">Coffee shop work</span>
+            </label>
+            <label class="checkbox-option">
+                <input type="checkbox" name="weekend_plans" value="Dancing">
+                <span class="checkbox-label">Dancing</span>
+            </label>
+            <label class="checkbox-option">
+                <input type="checkbox" name="weekend_plans" value="Sleeping">
+                <span class="checkbox-label">Sleeping</span>
+            </label>
+            <label class="checkbox-option">
+                <input type="checkbox" name="weekend_plans" value="Family time">
+                <span class="checkbox-label">Family time</span>
+            </label>
+            <label class="checkbox-option">
+                <input type="checkbox" name="weekend_plans" value="Road trips">
+                <span class="checkbox-label">Road trips</span>
+            </label>
+            <label class="checkbox-option">
+                <input type="checkbox" name="weekend_plans" value="Gaming">
+                <span class="checkbox-label">Gaming</span>
+            </label>
+            <label class="checkbox-option">
+                <input type="checkbox" name="weekend_plans" value="Shopping">
+                <span class="checkbox-label">Shopping</span>
+            </label>
+            <label class="checkbox-option">
+                <input type="checkbox" name="weekend_plans" value="Partying">
+                <span class="checkbox-label">Partying</span>
+            </label>
+            <label class="checkbox-option">
+                <input type="checkbox" name="weekend_plans" value="Outdoor activities">
+                <span class="checkbox-label">Outdoor activities</span>
+            </label>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Added styles for the interests section */
+    .checkbox-options {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+    }
+    
+    .checkbox-option {
+        display: flex;
+        align-items: center;
+        background-color: #f0f0f0;
+        border-radius: 20px;
+        padding: 6px 16px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    
+    .checkbox-option:hover {
+        background-color: #e0e0e0;
+    }
+    
+    .checkbox-option input[type="checkbox"] {
+        margin-right: 8px;
+    }
+    
+    .checkbox-option input[type="checkbox"]:checked + .checkbox-label {
+        font-weight: 600;
+    }
+    
+    .checkbox-option input[type="checkbox"]:checked {
+        accent-color: #4a7eff;
+    }
+    
+    .question-subtitle {
+        font-size: 0.9rem;
+        color: #666;
+        margin-top: 0;
+        margin-bottom: 10px;
+    }
+</style>
+            
+            <!-- Personality Section -->
+            <div class="section">
+                <h2 class="section-title">
+                    <svg class="section-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2zm0 2a8 8 0 100 16 8 8 0 000-16zm0 4a4 4 0 110 8 4 4 0 010-8z"/>
+                    </svg>
+                    Your Personality Profile
+                </h2>
+                
+                <div class="question">
+                    <p class="question-title">How would you describe your social energy?</p>
+                    <div class="options">
+                        <label class="radio-option">
+                            <input required type="radio" name="introvert_extrovert" value="Introvert" {% if questionnaire.introvert_extrovert == "Introvert" %}checked{% endif %}>
+                            <span class="radio-label">Introvert</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="introvert_extrovert" value="Extrovert" {% if questionnaire.introvert_extrovert == "Extrovert" %}checked{% endif %}>
+                            <span class="radio-label">Extrovert</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="introvert_extrovert" value="Ambivert" {% if questionnaire.introvert_extrovert == "Ambivert" %}checked{% endif %}>
+                            <span class="radio-label">Ambivert</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="introvert_extrovert" value="Reserved" {% if questionnaire.introvert_extrovert == "Reserved" %}checked{% endif %}>
+                            <span class="radio-label">Reserved</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="question">
+                    <p class="question-title">Your ideal first meet-up would be:</p>
+                    <div class="options">
+                        <label class="radio-option">
+                            <input required type="radio" name="first_meet" value="Café conversation" {% if questionnaire.first_meet == "Café conversation" %}checked{% endif %}>
+                            <span class="radio-label">Café conversation</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="first_meet" value="Quiet study spot" {% if questionnaire.first_meet == "Quiet study spot" %}checked{% endif %}>
+                            <span class="radio-label">Quiet study spot</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="first_meet" value="Campus stroll" {% if questionnaire.first_meet == "Campus stroll" %}checked{% endif %}>
+                            <span class="radio-label">Campus stroll</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="first_meet" value="College event" {% if questionnaire.first_meet == "College event" %}checked{% endif %}>
+                            <span class="radio-label">College event</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="first_meet" value="Virtual hangout" {% if questionnaire.first_meet == "Virtual hangout" %}checked{% endif %}>
+                            <span class="radio-label">Virtual hangout</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="question">
+                    <p class="question-title">Are you more productive at night or during the day?</p>
+                    <div class="options">
+                        <label class="radio-option">
+                            <input required type="radio" name="sleep_type" value="Night owl" {% if questionnaire.sleep_type == "Night owl" %}checked{% endif %}>
+                            <span class="radio-label">Night owl</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="sleep_type" value="Early bird" {% if questionnaire.sleep_type == "Early bird" %}checked{% endif %}>
+                            <span class="radio-label">Early bird</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="sleep_type" value="Adaptable to both" {% if questionnaire.sleep_type == "Adaptable to both" %}checked{% endif %}>
+                            <span class="radio-label">Adaptable to both</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="question">
+                    <p class="question-title">What quality draws you most to someone?</p>
+                    <div class="options">
+                        <label class="radio-option">
+                            <input required type="radio" name="important_trait" value="Appearance" {% if questionnaire.important_trait == "Appearance" %}checked{% endif %}>
+                            <span class="radio-label">Appearance</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="important_trait" value="Energy/Vibe" {% if questionnaire.important_trait == "Energy/Vibe" %}checked{% endif %}>
+                            <span class="radio-label">Energy/Vibe</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="important_trait" value="Communication" {% if questionnaire.important_trait == "Communication" %}checked{% endif %}>
+                            <span class="radio-label">Communication</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="important_trait" value="Ambition" {% if questionnaire.important_trait == "Ambition" %}checked{% endif %}>
+                            <span class="radio-label">Ambition</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="important_trait" value="Humor" {% if questionnaire.important_trait == "Humor" %}checked{% endif %}>
+                            <span class="radio-label">Humor</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="question">
+                    <p class="question-title">Which year of college are you in?</p>
+                    <div class="options">
+                        <label class="radio-option">
+                            <input required type="radio" name="year" value="1st Year" {% if questionnaire.year == "1st Year" %}checked{% endif %}>
+                            <span class="radio-label">1st Year</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="year" value="2nd Year" {% if questionnaire.year == "2nd Year" %}checked{% endif %}>
+                            <span class="radio-label">2nd Year</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="year" value="3rd Year" {% if questionnaire.year == "3rd Year" %}checked{% endif %}>
+                            <span class="radio-label">3rd Year</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="year" value="Final Year" {% if questionnaire.year == "Final Year" %}checked{% endif %}>
+                            <span class="radio-label">Final Year</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="year" value="Postgraduate" {% if questionnaire.year == "Postgraduate" %}checked{% endif %}>
+                            <span class="radio-label">Postgraduate</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="question">
+                    <p class="question-title">How would you describe your communication style?</p>
+                    <div class="options">
+                        <label class="radio-option">
+                            <input required type="radio" name="comm_style" value="Short & direct" {% if questionnaire.comm_style == "Short & direct" %}checked{% endif %}>
+                            <span class="radio-label">Short & direct</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="comm_style" value="Visual & expressive" {% if questionnaire.comm_style == "Visual & expressive" %}checked{% endif %}>
+                            <span class="radio-label">Visual & expressive</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="comm_style" value="Thoughtful & deep" {% if questionnaire.comm_style == "Thoughtful & deep" %}checked{% endif %}>
+                            <span class="radio-label">Thoughtful & deep</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="comm_style" value="Voice messages" {% if questionnaire.comm_style == "Voice messages" %}checked{% endif %}>
+                            <span class="radio-label">Voice messages</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="comm_style" value="Video/voice calls" {% if questionnaire.comm_style == "Video/voice calls" %}checked{% endif %}>
+                            <span class="radio-label">Video/voice calls</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="question">
+                    <p class="question-title">What's your relationship with social media?</p>
+                    <div class="options">
+                        <label class="radio-option">
+                            <input required type="radio" name="posting_frequency" value="Minimal presence" {% if questionnaire.posting_frequency == "Minimal presence" %}checked{% endif %}>
+                            <span class="radio-label">Minimal presence</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="posting_frequency" value="Occasional updates" {% if questionnaire.posting_frequency == "Occasional updates" %}checked{% endif %}>
+                            <span class="radio-label">Occasional updates</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="posting_frequency" value="Active participant" {% if questionnaire.posting_frequency == "Active participant" %}checked{% endif %}>
+                            <span class="radio-label">Active participant</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="posting_frequency" value="Daily contributor" {% if questionnaire.posting_frequency == "Daily contributor" %}checked{% endif %}>
+                            <span class="radio-label">Daily contributor</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="posting_frequency" value="Meaningful moments only" {% if questionnaire.posting_frequency == "Meaningful moments only" %}checked{% endif %}>
+                            <span class="radio-label">Meaningful moments only</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="question">
+                    <p class="question-title">Your ideal free time is spent:</p>
+                    <div class="options">
+                        <label class="radio-option">
+                            <input required type="radio" name="free_time" value="On personal interests" {% if questionnaire.free_time == "On personal interests" %}checked{% endif %}>
+                            <span class="radio-label">On personal interests</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="free_time" value="Socializing with friends" {% if questionnaire.free_time == "Socializing with friends" %}checked{% endif %}>
+                            <span class="radio-label">Socializing with friends</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="free_time" value="Discovering new things" {% if questionnaire.free_time == "Discovering new things" %}checked{% endif %}>
+                            <span class="radio-label">Discovering new things</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="free_time" value="On creative pursuits" {% if questionnaire.free_time == "On creative pursuits" %}checked{% endif %}>
+                            <span class="radio-label">On creative pursuits</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Connections Section -->
+            <div class="section">
+                <h2 class="section-title">
+                    <svg class="section-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                    </svg>
+                    Relationship Preferences
+                </h2>
+                
+                <div class="question">
+                    <p class="question-title">Your current relationship status</p>
+                    <div class="options">
+                        <label class="radio-option">
+                            <input required type="radio" name="relationship_status" value="Single" {% if questionnaire.relationship_status == "Single" %}checked{% endif %}>
+                            <span class="radio-label">Single</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="relationship_status" value="In a relationship" {% if questionnaire.relationship_status == "In a relationship" %}checked{% endif %}>
+                            <span class="radio-label">In a relationship</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="relationship_status" value="It's complicated" {% if questionnaire.relationship_status == "It's complicated" %}checked{% endif %}>
+                            <span class="radio-label">It's complicated</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="relationship_status" value="Prefer not to say" {% if questionnaire.relationship_status == "Prefer not to say" %}checked{% endif %}>
+                            <span class="radio-label">Prefer not to say</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="relationship_status" value="Open relationship" {% if questionnaire.relationship_status == "Open relationship" %}checked{% endif %}>
+                            <span class="radio-label">Open relationship</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="question">
+                    <p class="question-title">On PoornimaX, I'm looking for:</p>
+                    <div class="options">
+                        <label class="radio-option">
+                            <input required type="radio" name="looking_for" value="Girlfriend" {% if questionnaire.looking_for == "Girlfriend" %}checked{% endif %}>
+                            <span class="radio-label">Girlfriend</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="looking_for" value="Boyfriend" {% if questionnaire.looking_for == "Boyfriend" %}checked{% endif %}>
+                            <span class="radio-label">Boyfriend</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="looking_for" value="Friendship" {% if questionnaire.looking_for == "Friendship" %}checked{% endif %}>
+                            <span class="radio-label">Friendship</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="looking_for" value="Best friend" {% if questionnaire.looking_for == "Best friend" %}checked{% endif %}>
+                            <span class="radio-label">Best friend</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="looking_for" value="Study partner" {% if questionnaire.looking_for == "Study partner" %}checked{% endif %}>
+                            <span class="radio-label">Study partner</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="looking_for" value="Serious relationship" {% if questionnaire.looking_for == "Serious relationship" %}checked{% endif %}>
+                            <span class="radio-label">Serious relationship</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="looking_for" value="Casual connection" {% if questionnaire.looking_for == "Casual connection" %}checked{% endif %}>
+                            <span class="radio-label">Casual connection</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="looking_for" value="Friends with benefits" {% if questionnaire.looking_for == "Friends with benefits" %}checked{% endif %}>
+                            <span class="radio-label">Friends with benefits</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="looking_for" value="No expectations" {% if questionnaire.looking_for == "No expectations" %}checked{% endif %}>
+                            <span class="radio-label">No expectations</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="looking_for" value="Still figuring it out" {% if questionnaire.looking_for == "Still figuring it out" %}checked{% endif %}>
+                            <span class="radio-label">Still figuring it out</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="looking_for" value="Interesting conversations" {% if questionnaire.looking_for == "Interesting conversations" %}checked{% endif %}>
+                            <span class="radio-label">Interesting conversations</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="question">
+                    <p class="question-title">Your approach to dating or connections:</p>
+                    <div class="options">
+                        <label class="radio-option">
+                            <input required type="radio" name="dating_approach" value="Building gradually" {% if questionnaire.dating_approach == "Building gradually" %}checked{% endif %}>
+                            <span class="radio-label">Building gradually</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="dating_approach" value="Jumping right in" {% if questionnaire.dating_approach == "Jumping right in" %}checked{% endif %}>
+                            <span class="radio-label">Jumping right in</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="dating_approach" value="Seeking lasting connection" {% if questionnaire.dating_approach == "Seeking lasting connection" %}checked{% endif %}>
+                            <span class="radio-label">Seeking lasting connection</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="dating_approach" value="Keeping it light" {% if questionnaire.dating_approach == "Keeping it light" %}checked{% endif %}>
+                            <span class="radio-label">Keeping it light</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="question">
+                    <p class="question-title">How important is compatibility to you?</p>
+                    <div class="options">
+                        <label class="radio-option">
+                            <input required type="radio" name="compatibility" value="Essential" {% if questionnaire.compatibility == "Essential" %}checked{% endif %}>
+                            <span class="radio-label">Essential</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="compatibility" value="Somewhat important" {% if questionnaire.compatibility == "Somewhat important" %}checked{% endif %}>
+                            <span class="radio-label">Somewhat important</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="compatibility" value="Open to differences" {% if questionnaire.compatibility == "Open to differences" %}checked{% endif %}>
+                            <span class="radio-label">Open to differences</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="compatibility" value="Not a priority" {% if questionnaire.compatibility == "Not a priority" %}checked{% endif %}>
+                            <span class="radio-label">Not a priority</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="question">
+                    <p class="question-title">Are shared interests important to you?</p>
+                    <div class="options">
+                        <label class="radio-option">
+                            <input required type="radio" name="similar_interests" value="Very important" {% if questionnaire.similar_interests == "Very important" %}checked{% endif %}>
+                            <span class="radio-label">Very important</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="similar_interests" value="Variety is interesting" {% if questionnaire.similar_interests == "Variety is interesting" %}checked{% endif %}>
+                            <span class="radio-label">Variety is interesting</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="similar_interests" value="Prefer complementary differences" {% if questionnaire.similar_interests == "Prefer complementary differences" %}checked{% endif %}>
+                            <span class="radio-label">Prefer complementary differences</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="question">
+                    <p class="question-title">Your perspective on relationships:</p>
+                    <div class="options">
+                        <label class="radio-option">
+                            <input required type="radio" name="relationship_view" value="Meaningful commitment" {% if questionnaire.relationship_view == "Meaningful commitment" %}checked{% endif %}>
+                            <span class="radio-label">Meaningful commitment</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="relationship_view" value="Light and casual" {% if questionnaire.relationship_view == "Light and casual" %}checked{% endif %}>
+                            <span class="radio-label">Light and casual</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="relationship_view" value="Still discovering" {% if questionnaire.relationship_view == "Still discovering" %}checked{% endif %}>
+                            <span class="radio-label">Still discovering</span>
+                        </label>
+                        <label class="radio-option">
+                            <input required type="radio" name="relationship_view" value="It's about the experience" {% if questionnaire.relationship_view == "It's about the experience" %}checked{% endif %}>
+                            <span class="radio-label">It's about the experience</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="submit-container">
+                <button type="submit" class="submit-btn">Find My Matches</button>
+            </div>
+        </form>
+    </div>
+    
+    <div class="footer">
+        YOU KNOW WHO I AM
+    </div>
+
+    <script>
+        // Loading screen animation
+        window.addEventListener("load", () => {
+            setTimeout(() => {
+                const loader = document.querySelector(".loader-container");
+                if (loader) {
+                    loader.style.opacity = "0";
+                    loader.style.visibility = "hidden";
+                }
+            }, 1500); // Reduced to 1.5 seconds for better UX
+        });
+        
+        // Initialize particles.js
+        particlesJS("particles-js", {
+            particles: {
+                number: { value: 80, density: { enable: true, value_area: 800 } },
+                color: { value: "#6c63ff" },
+                shape: { type: "circle" },
+                opacity: { value: 0.5, random: false },
+                size: { value: 3, random: true },
+                line_linked: { enable: true, distance: 150, color: "#6c63ff", opacity: 0.4, width: 1 },
+                move: { enable: true, speed: 2, direction: "none", random: false, straight: false, out_mode: "out" }
+            },
+            interactivity: {
+                detect_on: "canvas",
+                events: {
+                    onhover: { enable: true, mode: "grab" },
+                    onclick: { enable: true, mode: "push" },
+                    resize: true
+                }
+            },
+            retina_detect: true
+        });
+    </script>
+</body>
+
+</html>

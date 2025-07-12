@@ -1,0 +1,1076 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PoornimaX - Home</title>
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+  <style>
+    /* Base Styles */
+    :root {
+      --primary: #6c63ff;
+      --primary-light: #8f88ff;
+      --primary-dark: #5046e5;
+      --secondary: #ff6584;
+      --secondary-light: #ff85a2;
+      --bg: #f8f9fa;
+      --text: #333;
+      --text-light: #777;
+      --card-bg: #fff;
+      --shadow: rgba(0, 0, 0, 0.1);
+      --radius: 12px;
+      --transition: all 0.3s ease;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 70px;
+      overflow-x: hidden;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+    
+    button {
+      cursor: pointer;
+      border: none;
+      outline: none;
+      font-size: 14px;
+      font-weight: 500;
+      background: transparent;
+    }
+
+    .loader-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg); /* make sure this variable is defined */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+/* HTML: <div class="loader"></div> */
+.loader {
+  width: 80px;
+  height: 40px;
+  display: flex;
+}
+
+.loader:before,
+.loader:after {
+  content: "";
+  margin: 0 -2px 0 0;
+  flex: 1;
+  --c: no-repeat linear-gradient(#046D8B 0 0);
+  background: var(--c), var(--c), var(--c), var(--c);
+  animation: l13-1 1s infinite linear, l13-2 1s infinite linear;
+}
+
+.loader:after {
+  transform: scale(-1);
+  margin: 0 0 0 -2px;
+}
+
+@keyframes l13-1 {
+  0%, 3%   {background-size: 0 4px, 4px 0, 0 4px, 4px 0;}
+  12.5%    {background-size: 50% 4px, 4px 0, 0 4px, 4px 0;}
+  25%      {background-size: 50% 4px, 4px 50%, 0 4px, 4px 0;}
+  37.5%    {background-size: 50% 4px, 4px 50%, 50% 4px, 4px 0;}
+  46%, 54% {background-size: 50% 4px, 4px 50%, 50% 4px, 4px 50%;}
+  62.5%    {background-size: 0 4px, 4px 50%, 50% 4px, 4px 50%;}
+  75%      {background-size: 0 4px, 4px 0, 50% 4px, 4px 50%;}
+  87.5%    {background-size: 0 4px, 4px 0, 0 4px, 4px 50%;}
+  96%,100% {background-size: 0 4px, 4px 0, 0 4px, 4px 0;}
+}
+
+@keyframes l13-2 {
+  0%, 49.9%  {background-position: 0 20px, 50% 20px, 20px 100%, 100% 100%;}
+  50%, 100%  {background-position: right 20px top 20px, 50% 100%, 100% 100%, 100% 20px;}
+}
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.9); opacity: 0.7; }
+      100% { transform: scale(1.1); opacity: 1; }
+    }
+
+    /* Particles Background */
+    #particles-js {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      opacity: 0.2;
+    }
+
+    /* Layout */
+    .content-wrapper {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 15px;
+      opacity: 0;
+      transform: translateY(15px);
+      animation: fadeInUp 0.8s forwards;
+      animation-delay: 2s;
+    }
+
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0;
+      margin-bottom: 20px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    @keyframes floatingLogo {
+      0%, 100% {
+        transform: translateY(0) rotate(0deg);
+      }
+      50% {
+        transform: translateY(-5px) rotate(5deg);
+      }
+    }
+
+    header h2 {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--primary);
+      background: linear-gradient(45deg, var(--primary), var(--primary-light));
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+
+    header a img {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--primary);
+      transition: var(--transition);
+      box-shadow: 0 2px 10px rgba(108, 99, 255, 0.2);
+    }
+
+    header a img:hover {
+      transform: scale(1.1) rotate(5deg);
+      box-shadow: 0 0 15px var(--primary-light);
+    }
+
+    /* Tagline */
+    .tagline-container {
+      text-align: center;
+      margin-bottom: 30px;
+      position: relative;
+    }
+
+    .tagline {
+      font-style: italic;
+      color: var(--text-light);
+      font-size: 17px;
+      opacity: 0.8;
+      position: relative;
+      display: inline-block;
+    }
+
+    .tagline::before, .tagline::after {
+      content: '"';
+      color: var(--primary-light);
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .tagline::after {
+      content: '"';
+    }
+
+    /* Stats Section */
+    .stats-container {
+      margin-bottom: 40px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+    }
+
+    .popup-box {
+      background: white;
+      border-radius: var(--radius);
+      padding: 20px 15px;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(108, 99, 255, 0.15);
+      position: relative;
+      overflow: hidden;
+      animation: popIn 0.5s ease forwards;
+      animation-delay: calc(var(--delay) * 0.1s + 2s);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: var(--transition);
+      border: 1px solid rgba(108, 99, 255, 0.1);
+    }
+
+    .popup-box:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(108, 99, 255, 0.2);
+    }
+
+    @keyframes popIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .popup-box-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, var(--primary-light), var(--primary));
+      border-radius: 15px;
+      margin: 0 auto 12px;
+      transform: rotate(0deg);
+      transition: var(--transition);
+    }
+
+    .popup-box:hover .popup-box-icon {
+      transform: rotate(10deg) scale(1.1);
+    }
+
+    .popup-box-icon i {
+      font-size: 24px;
+      color: white;
+    }
+
+    .popup-box p {
+      font-size: 14px;
+      color: var(--text-light);
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .popup-box strong {
+      font-size: 24px;
+      background: linear-gradient(45deg, var(--primary), var(--primary-dark));
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      font-weight: 700;
+    }
+
+    .glow-pulse {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-radius: var(--radius);
+      box-shadow: inset 0 0 0 2px var(--primary-light);
+      opacity: 0;
+      animation: glowPulse 3s infinite;
+    }
+
+    @keyframes glowPulse {
+      0%, 100% {
+        opacity: 0;
+      }
+      50% {
+        opacity: 0.2;
+      }
+    }
+
+    .mystery-flash {
+      position: absolute;
+      height: 100%;
+      width: 30px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+      transform: skewX(-20deg);
+      top: 0;
+      left: -100px;
+      animation: flash 5s infinite;
+      animation-delay: calc(var(--delay) * 0.8s + 2s);
+    }
+
+    @keyframes flash {
+      0% {
+        left: -100px;
+      }
+      20%, 100% {
+        left: 120%;
+      }
+    }
+
+    /* Section Divider */
+    .section-divider {
+      height: 2px;
+      background: linear-gradient(to right, transparent, var(--primary-light), transparent);
+      margin: 35px 0;
+      position: relative;
+    }
+
+    .section-divider::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 10px;
+      height: 10px;
+      background-color: var(--primary-light);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--primary-light);
+    }
+
+    /* Horizontal Scroll Sections */
+    .horizontal-section {
+      margin-bottom: 35px;
+      position: relative;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .section-header h2 {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text);
+      position: relative;
+      padding-left: 15px;
+    }
+
+    .section-header h2::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 5px;
+      height: 20px;
+      background: linear-gradient(to bottom, var(--primary), var(--primary-light));
+      border-radius: 3px;
+    }
+
+    .section-count {
+      background: linear-gradient(45deg, var(--primary), var(--primary-light));
+      color: white;
+      font-size: 12px;
+      border-radius: 30px;
+      padding: 3px 10px;
+      margin-left: 10px;
+      box-shadow: 0 2px 8px rgba(108, 99, 255, 0.3);
+    }
+
+    .scroll-nav {
+      position: absolute;
+      right: 0;
+      top: 0;
+      display: flex;
+      gap: 10px;
+    }
+
+    .scroll-button {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(45deg, var(--primary), var(--primary-light));
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+      box-shadow: 0 3px 10px rgba(108, 99, 255, 0.25);
+    }
+
+    .scroll-button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 5px 15px rgba(108, 99, 255, 0.4);
+    }
+
+    .scroll-container {
+      display: flex;
+      gap: 20px;
+      overflow-x: auto;
+      padding: 10px 5px 20px;
+      scrollbar-width: none; /* Hide scrollbar for Firefox */
+      -ms-overflow-style: none; /* Hide scrollbar for IE and Edge */
+    }
+
+    .scroll-container::-webkit-scrollbar {
+      display: none; /* Hide scrollbar for Chrome and Safari */
+    }
+
+    /* User Cards */
+    .user-card {
+      flex: 0 0 auto;
+      width: 320px;
+      background-color: white;
+      border-radius: var(--radius);
+      box-shadow: 0 8px 20px rgba(108, 99, 255, 0.12);
+      overflow: hidden;
+      display: flex;
+      transition: var(--transition);
+      border: 1px solid rgba(108, 99, 255, 0.08);
+      position: relative;
+    }
+
+    .user-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      opacity: 0;
+      transition: var(--transition);
+    }
+
+    .user-card:hover::before {
+      opacity: 1;
+    }
+
+    .user-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(108, 99, 255, 0.2);
+    }
+
+    .profile-link {
+      display: flex;
+      padding: 18px;
+      flex: 1;
+    }
+
+    .profile-pic-container {
+      position: relative;
+      width: 100px;
+      height: 100px;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-right: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-pic {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: var(--transition);
+    }
+
+    .user-card:hover .profile-pic {
+      transform: scale(1.08);
+    }
+
+    .profile-pic-glow {
+      position: absolute;
+      inset: 0;
+      border-radius: 12px;
+      box-shadow: inset 0 0 0 3px var(--primary-light);
+      opacity: 0;
+      transition: var(--transition);
+    }
+
+    .user-card:hover .profile-pic-glow {
+      opacity: 1;
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      flex: 1;
+    }
+
+    .user-info h3 {
+      font-size: 17px;
+      margin-bottom: 6px;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .user-info p {
+      font-size: 13px;
+      color: var(--text-light);
+      margin-bottom: 5px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: flex;
+      align-items: center;
+    }
+
+    .user-info p i {
+      margin-right: 6px;
+      color: var(--primary);
+      font-size: 12px;
+    }
+
+    /* Heart Button */
+    .heart-form {
+      display: flex;
+      align-items: center;
+      padding-right: 18px;
+    }
+
+    .heart-btn {
+      background: none;
+      border: none;
+      padding: 10px;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .heart-btn i {
+      transition: var(--transition);
+      font-size: 24px;
+    }
+
+    .heart-btn::before {
+      content: '';
+      position: absolute;
+      width: 45px;
+      height: 45px;
+      background-color: rgba(255, 101, 132, 0.1);
+      border-radius: 50%;
+      z-index: -1;
+      transform: scale(0);
+      transition: var(--transition);
+    }
+
+    .heart-btn:hover::before {
+      transform: scale(1);
+    }
+
+    .heart-btn:hover i {
+      transform: scale(1.2);
+    }
+
+    /* Bottom Navigation */
+    nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 0;
+      box-shadow: 0 -3px 15px var(--shadow);
+      z-index: 100;
+    }
+
+    nav a {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: var(--text-light);
+      padding: 8px 16px;
+      position: relative;
+      transition: var(--transition);
+    }
+
+    nav a i {
+      transition: var(--transition);
+      opacity: 0.7;
+      font-size: 24px;
+    }
+
+    nav a:hover i {
+      transform: translateY(-5px);
+      opacity: 1;
+    }
+
+    nav a.active-link {
+      color: var(--primary);
+    }
+
+    nav a.active-link i {
+      opacity: 1;
+      color: var(--primary);
+    }
+
+    nav a.active-link::after {
+      content: '';
+      position: absolute;
+      bottom: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 40px;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--primary-light));
+      border-radius: 4px;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 992px) {
+      .stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .header-left h2 {
+        font-size: 18px;
+      }
+      
+      .popup-box {
+        padding: 15px 10px;
+      }
+      
+      .popup-box-icon {
+        width: 40px;
+        height: 40px;
+      }
+      
+      .popup-box-icon i {
+        font-size: 20px;
+      }
+      
+      .popup-box p {
+        font-size: 12px;
+      }
+      
+      .popup-box strong {
+        font-size: 20px;
+      }
+      
+      .user-card {
+        width: 280px;
+      }
+      
+      .profile-pic-container {
+        width: 80px;
+        height: 80px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading Screen -->
+  <div class="loader-container" id="loaderContainer">
+    <div class="loader">
+    </div>
+  </div>
+
+  <!-- Particle Background -->
+  <div id="particles-js"></div>
+  
+  <div class="content-wrapper">
+    <!-- Top Section -->
+    <header>
+      <div class="header-left">
+        <h2>POORNIMAX<br>Welcome, {{ user.full_name }}</h2>
+      </div>
+      <!-- Profile Link for Logged-In User -->
+      <a href="{% url 'feed:profile' user_id=user.id %}">
+        <img src="{{ user.profile_picture.url }}" alt="Profile">
+      </a>
+    </header>
+  
+    <div class="tagline-container">
+      <p class="tagline">Where connections spark and stories begin</p>
+    </div>
+  
+    <!-- Quick Stats Section -->
+    <section class="stats-container">
+      <div class="stats">
+        <div class="popup-box" style="--delay: 0">
+          <a href="{% url 'feed:hearts_sent' %}">
+          <div class="mystery-flash" style="--delay: 0"></div>
+          <div class="glow-pulse"></div>
+          <div class="popup-box-icon">
+            <i class="fas fa-heart-circle-plus"></i>
+          </a>
+          </div>
+          <p>Hearts Sent</p>
+          <strong>{{ hearts_sent }}</strong>
+        </div>
+        
+        <div class="popup-box" style="--delay: 1">
+          <a href="{% url 'feed:hearts_received' %}">
+          <div class="mystery-flash" style="--delay: 1"></div>
+          <div class="glow-pulse"></div>
+          <div class="popup-box-icon">
+            <i class="fas fa-heart-circle-check"></i>
+          </div>
+          <p>Hearts Received</p>
+          <strong>{{ hearts_received }}</strong>
+          </a>
+        </div>
+        
+        <div class="popup-box" style="--delay: 2">
+          <a href="{% url 'feed:friends_list' %}">
+          <div class="mystery-flash" style="--delay: 2"></div>
+          <div class="glow-pulse"></div>
+          <div class="popup-box-icon">
+            <i class="fas fa-user-group"></i>
+          </div>
+          <p>Friends</p>
+          <strong>{{ friends }}</strong>
+          </a>
+        </div>
+        
+        <div class="popup-box" style="--delay: 3">
+          <div class="mystery-flash" style="--delay: 3"></div>
+          <div class="glow-pulse"></div>
+          <div class="popup-box-icon">
+            <i class="fas fa-eye"></i>
+          </div>
+          <p>Profile Views</p>
+          <strong>{{ profile_views }}</strong>
+        </div>
+      </div>
+    </section>
+  
+    <div class="section-divider"></div>
+  
+    <!-- Horizontal Scroll Sections -->
+    <section class="horizontal-section">
+      <div class="section-header">
+        <h2>Recently Joined <span class="section-count">{{ recently_joined|length }}</span></h2>
+      </div>
+      <div class="scroll-nav">
+        <button class="scroll-button scroll-left" data-target="recently-joined">←</button>
+        <button class="scroll-button scroll-right" data-target="recently-joined">→</button>
+      </div>
+      <div class="scroll-container" id="recently-joined">
+        {% for entry in recently_joined %}
+        <div class="user-card">
+          <a href="{% url 'feed:profile' user_id=entry.user.id %}" class="profile-link">
+            <div class="profile-pic-container">
+              <img src="{{ entry.user.profile_picture.url }}" alt="Profile" class="profile-pic">
+              <div class="profile-pic-glow"></div>
+            </div>
+            <div class="user-info">
+              <h3>{{ entry.user.full_name }}</h3>
+              <p><i class="fas fa-graduation-cap"></i> {{ entry.user.department }} • 
+                 {% if entry.user.questionnaire %}{{ entry.user.questionnaire.year }}{% else %}Student{% endif %}</p>
+              <p><i class="fas fa-university"></i> {{ entry.user.college }}</p>
+            </div>
+          </a>
+          
+          <form method="POST" action="{% url 'feed:crush_action' user_id=entry.user.id %}" class="heart-form">
+            {% csrf_token %}
+            {% if entry.crush_status == 'mutual' %}
+            <button type="submit" name="crush_action" value="uncrush" class="heart-btn">
+              <i class="fas fa-heart" style="color: var(--secondary);"></i>
+            </button>
+            {% elif entry.crush_status == 'sent' %}
+            <button type="submit" name="crush_action" value="uncrush" class="heart-btn">
+              <i class="fas fa-heart" style="color: rgba(255, 101, 132, 0.8);"></i>
+            </button>
+            {% elif entry.crush_status == 'received' %}
+            <button type="submit" name="crush_action" value="accept_crush" class="heart-btn">
+              <i class="far fa-heart" style="color: var(--secondary);"></i>
+            </button>
+            {% else %}
+            <button type="submit" name="crush_action" value="send_crush" class="heart-btn">
+              <i class="far fa-heart" style="color: var(--text-light);"></i>
+            </button>
+            {% endif %}
+          </form>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+  
+    <div class="section-divider"></div>
+  
+    <!-- Same Year Section -->
+    <section class="horizontal-section">
+      <div class="section-header">
+        <h2>Same Year <span class="section-count">{{ same_year|length }}</span></h2>
+      </div>
+      <div class="scroll-nav">
+        <button class="scroll-button scroll-left" data-target="same-year">←</button>
+        <button class="scroll-button scroll-right" data-target="same-year">→</button>
+      </div>
+      <div class="scroll-container" id="same-year">
+        {% for entry in same_year %}
+        <div class="user-card">
+          <a href="{% url 'feed:profile' user_id=entry.user.id %}" class="profile-link">
+            <div class="profile-pic-container">
+              <img src="{{ entry.user.profile_picture.url }}" alt="Profile" class="profile-pic">
+              <div class="profile-pic-glow"></div>
+            </div>
+            <div class="user-info">
+              <h3>{{ entry.user.full_name }}</h3>
+              <p><i class="fas fa-graduation-cap"></i> {{ entry.user.department }} • 
+                 {% if entry.user.questionnaire %}{{ entry.user.questionnaire.year }}{% else %}Student{% endif %}</p>
+              <p><i class="fas fa-university"></i> {{ entry.user.college }}</p>
+            </div>
+          </a>
+          
+          <form method="POST" action="{% url 'feed:crush_action' user_id=entry.user.id %}" class="heart-form">
+            {% csrf_token %}
+            {% if entry.crush_status == 'mutual' %}
+            <button type="submit" name="crush_action" value="uncrush" class="heart-btn">
+              <i class="fas fa-heart" style="color: var(--secondary);"></i>
+            </button>
+            {% elif entry.crush_status == 'sent' %}
+            <button type="submit" name="crush_action" value="uncrush" class="heart-btn">
+              <i class="fas fa-heart" style="color: rgba(255, 101, 132, 0.8);"></i>
+            </button>
+            {% elif entry.crush_status == 'received' %}
+            <button type="submit" name="crush_action" value="accept_crush" class="heart-btn">
+              <i class="far fa-heart" style="color: var(--secondary);"></i>
+            </button>
+            {% else %}
+            <button type="submit" name="crush_action" value="send_crush" class="heart-btn">
+              <i class="far fa-heart" style="color: var(--text-light);"></i>
+            </button>
+            {% endif %}
+          </form>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+    
+    <div class="section-divider"></div>
+    
+    <!-- Same Department Section -->
+    <section class="horizontal-section">
+      <div class="section-header">
+        <h2>Same Department <span class="section-count">{{ same_department|length }}</span></h2>
+      </div>
+      <div class="scroll-nav">
+        <button class="scroll-button scroll-left" data-target="same-department">←</button>
+        <button class="scroll-button scroll-right" data-target="same-department">→</button>
+      </div>
+      <div class="scroll-container" id="same-department">
+        {% for entry in same_department %}
+        <div class="user-card">
+          <a href="{% url 'feed:profile' user_id=entry.user.id %}" class="profile-link">
+            <div class="profile-pic-container">
+              <img src="{{ entry.user.profile_picture.url }}" alt="Profile" class="profile-pic">
+              <div class="profile-pic-glow"></div>
+            </div>
+            <div class="user-info">
+              <h3>{{ entry.user.full_name }}</h3>
+              <p><i class="fas fa-graduation-cap"></i> {{ entry.user.department }} • 
+                 {% if entry.user.questionnaire %}{{ entry.user.questionnaire.year }}{% else %}Student{% endif %}</p>
+              <p><i class="fas fa-university"></i> {{ entry.user.college }}</p>
+            </div>
+          </a>
+          
+          <form method="POST" action="{% url 'feed:crush_action' user_id=entry.user.id %}" class="heart-form">
+            {% csrf_token %}
+            {% if entry.crush_status == 'mutual' %}
+            <button type="submit" name="crush_action" value="uncrush" class="heart-btn">
+              <i class="fas fa-heart" style="color: var(--secondary);"></i>
+            </button>
+            {% elif entry.crush_status == 'sent' %}
+            <button type="submit" name="crush_action" value="uncrush" class="heart-btn">
+              <i class="fas fa-heart" style="color: rgba(255, 101, 132, 0.8);"></i>
+            </button>
+            {% elif entry.crush_status == 'received' %}
+            <button type="submit" name="crush_action" value="accept_crush" class="heart-btn">
+              <i class="far fa-heart" style="color: var(--secondary);"></i>
+            </button>
+            {% else %}
+            <button type="submit" name="crush_action" value="send_crush" class="heart-btn">
+              <i class="far fa-heart" style="color: var(--text-light);"></i>
+            </button>
+            {% endif %}
+          </form>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+    
+    <div class="section-divider"></div>
+    
+    <!-- Same College Section -->
+    <section class="horizontal-section">
+      <div class="section-header">
+        <h2>Same College <span class="section-count">{{ same_college|length }}</span></h2>
+      </div>
+      <div class="scroll-nav">
+        <button class="scroll-button scroll-left" data-target="same-college">←</button>
+        <button class="scroll-button scroll-right" data-target="same-college">→</button>
+      </div>
+      <div class="scroll-container" id="same-college">
+        {% for entry in same_college %}
+        <div class="user-card">
+          <a href="{% url 'feed:profile' user_id=entry.user.id %}" class="profile-link">
+            <div class="profile-pic-container">
+              <img src="{{ entry.user.profile_picture.url }}" alt="Profile" class="profile-pic">
+              <div class="profile-pic-glow"></div>
+            </div>
+            <div class="user-info">
+              <h3>{{ entry.user.full_name }}</h3>
+              <p><i class="fas fa-graduation-cap"></i> {{ entry.user.department }} • 
+                 {% if entry.user.questionnaire %}{{ entry.user.questionnaire.year }}{% else %}Student{% endif %}</p>
+              <p><i class="fas fa-university"></i> {{ entry.user.college }}</p>
+            </div>
+          </a>
+          
+          <form method="POST" action="{% url 'feed:crush_action' user_id=entry.user.id %}" class="heart-form">
+            {% csrf_token %}
+            {% if entry.crush_status == 'mutual' %}
+            <button type="submit" name="crush_action" value="uncrush" class="heart-btn">
+              <i class="fas fa-heart" style="color: var(--secondary);"></i>
+            </button>
+            {% elif entry.crush_status == 'sent' %}
+            <button type="submit" name="crush_action" value="uncrush" class="heart-btn">
+              <i class="fas fa-heart" style="color: rgba(255, 101, 132, 0.8);"></i>
+            </button>
+            {% elif entry.crush_status == 'received' %}
+            <button type="submit" name="crush_action" value="accept_crush" class="heart-btn">
+              <i class="far fa-heart" style="color: var(--secondary);"></i>
+            </button>
+            {% else %}
+            <button type="submit" name="crush_action" value="send_crush" class="heart-btn">
+              <i class="far fa-heart" style="color: var(--text-light);"></i>
+            </button>
+            {% endif %}
+          </form>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+
+  <!-- Bottom Navigation Bar -->
+  <nav>
+    <a href="{% url 'feed:home' %}" class="active-link">
+      <i class="fas fa-home"></i>
+    </a>
+    <a href="{% url 'feed:explore' %}">
+      <i class="fas fa-compass"></i>
+    </a>
+    <a href="{% url 'feed:create_post' %}">
+      <i class="fas fa-plus-circle"></i>
+    </a>
+    <a href="{% url 'feed:friends_list' %}">
+      <i class="fas fa-user-friends"></i>
+    </a>
+    <a href="{% url 'chat:inbox' %}">
+      <i class="fas fa-comment"></i>
+    </a>
+  </nav>
+
+  <script>
+    // Loading animation
+    window.addEventListener('load', function() {
+      setTimeout(function() {
+        const loader = document.getElementById('loaderContainer');
+        loader.style.opacity = '0';
+        setTimeout(function() {
+          loader.style.visibility = 'hidden';
+        }, 500);
+      }, 1000); // Display for 1 second instead of 2
+    });
+
+    // Initialize particles.js
+    particlesJS('particles-js', {
+      particles: {
+        number: { value: 100, density: { enable: true, value_area: 1000 } },
+        color: { value: "#6c63ff" },
+        shape: { type: "circle" },
+        opacity: { value: 0.5, random: true },
+        size: { value: 3, random: true },
+        line_linked: {
+          enable: true,
+          distance: 150,
+          color: "#6c63ff",
+          opacity: 0.4,
+          width: 1
+        },
+        move: {
+          enable: true,
+          speed: 2,
+          direction: "none",
+          random: false,
+          straight: false,
+          out_mode: "out",
+          bounce: false,
+          attract: { enable: true, rotateX: 600, rotateY: 1200 }
+        }
+      },
+      interactivity: {
+        detect_on: "canvas",
+        events: {
+          onhover: { enable: true, mode: "grab" },
+          onclick: { enable: true, mode: "push" },
+          resize: true
+        },
+        modes: {
+          grab: { distance: 140, line_linked: { opacity: 1 } },
+          push: { particles_nb: 4 }
+        }
+      }
+    });
+
+    // Horizontal scroll functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const scrollButtons = document.querySelectorAll('.scroll-button');
+      
+      scrollButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const targetId = this.getAttribute('data-target');
+          const container = document.getElementById(targetId);
+          const scrollAmount = 340;
+          
+          if (this.classList.contains('scroll-left')) {
+            container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+          } else {
+            container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

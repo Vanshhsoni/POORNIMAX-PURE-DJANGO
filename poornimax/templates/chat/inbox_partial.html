@@ -1,0 +1,51 @@
+{% for user in users %}
+  <div class="chat-item-wrapper" data-username="{{ user.username }}">
+    <div class="chat-item">
+      <a href="{% url 'chat:chat_with_user' user.username %}" class="chat-link">
+        <div class="profile-pic-container" style="position: relative;">
+          <img src="{{ user.profile_picture.url }}" alt="Profile" class="profile-pic">
+          <div class="profile-pic-glow"></div>
+          {% if user.has_unread %}
+            <span class="unread-dot"></span>
+          {% endif %}
+        </div>
+        <div class="user-info">
+          <h3>{{ user.full_name }}</h3>
+          <p>
+            {% if user.questionnaire %}
+              <i class="fas fa-graduation-cap"></i> {{ user.department }} • {{ user.questionnaire.year }}
+            {% else %}
+              <i class="fas fa-user"></i> {{ user.username }}
+            {% endif %}
+          </p>
+        </div>
+      </a>
+      <div class="chat-status">
+        <div class="menu-dots">
+          <i class="fas fa-ellipsis-v"></i>
+        </div>
+        <div class="dropdown-menu">
+          <button class="delete-btn" data-username="{{ user.username }}">
+            <i class="fas fa-trash-alt"></i> Delete Chat
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endfor %}
+<style>
+    .unread-dot {
+  position: absolute;
+  top: 5px;       /* Adjust as needed */
+  right: 5px;     /* Adjust as needed */
+  height: 12px;
+  width: 12px;
+  background-color: #ff3b3b;  /* Bright red */
+  border-radius: 50%;
+  border: 2px solid white;    /* Optional white border */
+  box-shadow: 0 0 3px rgba(255, 0, 0, 0.5);
+  pointer-events: none;
+  z-index: 10;
+}
+
+</style>
