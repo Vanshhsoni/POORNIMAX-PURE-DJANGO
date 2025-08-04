@@ -81,6 +81,20 @@ def signup_access(request):
 
     return render(request, 'accounts/signup.html')
 
+# accounts/views.py
+
+import random
+from django.conf import settings
+from django.core.mail import send_mail
+from django.shortcuts import render, redirect
+from django.contrib.auth import login
+from django.contrib import messages
+from .models import User # Make sure to import your User model
+
+# This is assumed to be a temporary in-memory store.
+# For production, consider using request.session or a cache like Redis.
+otp_store = {}
+
 
 def login_access(request):
     if request.method == 'POST':
@@ -113,27 +127,44 @@ def login_access(request):
 def verify_otp(request):
     if request.method == 'POST':
         email = request.POST.get('college_email')
-        otp = request.POST.get('otp')
+        submitted_otp = request.POST.get('otp')
 
-        if otp_store.get(email) == otp:
+        # Check if the stored OTP matches the submitted one
+        if otp_store.get(email) == submitted_otp:
+            # --- OTP IS CORRECT ---
             try:
                 user = User.objects.get(college_email=email)
                 user.otp_verified = True
                 user.save()
 
-                login(request, user)
-                print("LOGGED IN")  # 🔑 THIS is what logs user in properly
+                login(request, user)  # Create the user's session
+
+                # Clean up the used OTP
+                if email in otp_store:
+                    del otp_store[email]
+
+                # Redirect to the appropriate page
                 if user.has_answered_questionnaire:
-                    return redirect('feed:home')  # Redirect to the page if the user has already answered the questionnaire
+                    return redirect('feed:home')
                 else:
                     return redirect('accounts:x')
+
             except User.DoesNotExist:
-                messages.error(request, "User not found.")
+                messages.error(request, "An unexpected error occurred. Please try again.")
+                return redirect('accounts:load_login')
         else:
-            messages.error(request, "Invalid OTP.")
+            # --- OTP IS INCORRECT ---
+            # Re-render the login page with the OTP popup still active
+            # and pass a specific error message.
+            context = {
+                'show_otp': True,
+                'email': email,
+                'otp_error': 'Invalid OTP. Please try again.'
+            }
+            return render(request, 'accounts/login.html', context)
 
+    # If the request method isn't POST, redirect to the login page.
     return redirect('accounts:load_login')
-
 
 @login_required
 def answers_view(request):
@@ -157,124 +188,118 @@ def answers_view(request):
     }
     return render(request, 'accounts/ans.html', context)
 
+# in views.py
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .models import UserQuestionnaire 
+# Make sure to import your updated model
+
+# in views.py
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .models import UserQuestionnaire 
+# Make sure to import your updated model
+
+# in your app/views.py
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .models import UserQuestionnaire # Make sure to import your updated model
+# from accounts.models import Profile # Make sure you have a Profile model or similar
+
+
+# in your app/views.py
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .models import UserQuestionnaire, Profile
 
 @login_required
 def questionnaire_view(request):
     user = request.user
     
-    # Define choices here directly
-    HOBBY_CHOICES = [
-        ('Photography', 'Photography'),
-        ('Coding', 'Coding'),
-        ('Gaming', 'Gaming'),
-        ('Editing', 'Editing'),
-        ('Designing', 'Designing'),
-        ('Reading', 'Reading'),
-        ('Music', 'Music'),
-        ('Cooking', 'Cooking'),
-        ('Traveling', 'Traveling'),
-        ('Dancing', 'Dancing'),
-        ('Singing', 'Singing'),
-        ('Painting', 'Painting'),
-        ('Fitness', 'Fitness'),
-        ('Sports', 'Sports'),
-        ('Hiking', 'Hiking'),
-        ('Movies', 'Movies'),
-        ('Anime', 'Anime'),
-        ('Writing', 'Writing'),
-        ('Driving', 'Driving'),
-    ]
+    # Ensure user has a profile
+    profile, created = Profile.objects.get_or_create(user=user)
     
-    EVENT_CHOICES = [
-        ('Tech Fests', 'Tech Fests'),
-        ('Cultural Nights', 'Cultural Nights'),
-        ('Hackathons', 'Hackathons'),
-        ('Workshops', 'Workshops'),
-        ('Sports Competitions', 'Sports Competitions'),
-        ('Seminars', 'Seminars'),
-        ('Club Activities', 'Club Activities'),
-        ('Conferences', 'Conferences'),
-        ('Competitions', 'Competitions'),
-        ('Social Gatherings', 'Social Gatherings'),
-        ('Debates', 'Debates'),
-    ]
+    # Check if user already completed questionnaire
+    if profile.has_answered_questionnaire:
+        messages.info(request, "You have already completed the questionnaire.")
+        return redirect('feed:home')  # Adjust redirect as needed
     
-    WEEKEND_CHOICES = [
-        ('City exploration', 'City exploration'),
-        ('Movie marathons', 'Movie marathons'),
-        ('Coffee shop work', 'Coffee shop work'),
-        ('Dancing', 'Dancing'),
-        ('Sleeping', 'Sleeping'),
-        ('Family time', 'Family time'),
-        ('Road trips', 'Road trips'),
-        ('Gaming', 'Gaming'),
-        ('Shopping', 'Shopping'),
-        ('Partying', 'Partying'),
-        ('Outdoor activities', 'Outdoor activities'),
-    ]
-
-    # Create context with form choices to populate the form
+    # Get 'looking_for' choices directly from the model for consistency
+    looking_for_choices = [choice[0] for choice in UserQuestionnaire._meta.get_field('looking_for').choices]
+    
     context = {
-        'HOBBY_CHOICES': HOBBY_CHOICES,
-        'EVENT_CHOICES': EVENT_CHOICES,
-        'WEEKEND_CHOICES': WEEKEND_CHOICES,
+        'personality_choices': ['Introvert', 'Extrovert', 'A mix of both'],
+        'comm_style_choices': ['Mostly texting', 'Voice & video calls', 'A bit of everything'],
+        'hobbies_choices': ['Gaming', 'Music', 'Movies & Shows', 'Coding', 'Sports', 'Art & Design', 'Reading', 'Travel', 'Foodie'],
+        'year_choices': ['1st Year', '2nd Year', '3rd Year', 'Final Year', 'Postgraduate'],
+        'status_choices': ['Single', 'Taken', "It's Complicated", 'Focusing on me'],
+        'looking_for_choices': looking_for_choices,
     }
 
     if request.method == 'POST':
-        data = request.POST
+        try:
+            data = request.POST
+            
+            # Validate required fields
+            required_fields = ['personality', 'communication_style', 'year', 'relationship_status', 'looking_for']
+            missing_fields = [field for field in required_fields if not data.get(field)]
+            
+            if missing_fields:
+                messages.error(request, f"Please fill in all required fields: {', '.join(missing_fields)}")
+                return render(request, 'accounts/questionnaire.html', context)
+            
+            # Create or update questionnaire
+            questionnaire, created = UserQuestionnaire.objects.get_or_create(user=user)
 
-        # Check if user already has a questionnaire entry
-        questionnaire, created = UserQuestionnaire.objects.get_or_create(user=user)
+            # Save data from the form
+            questionnaire.personality = data.get('personality', '')
+            questionnaire.communication_style = data.get('communication_style', '')
+            questionnaire.year = data.get('year', '')
+            questionnaire.relationship_status = data.get('relationship_status', '')
+            questionnaire.looking_for = data.get('looking_for', '')
+            
+            # Handle hobbies (checkbox values)
+            hobbies_list = data.getlist('hobbies_interests')
+            if len(hobbies_list) > 5:
+                messages.error(request, "Please select maximum 5 hobbies.")
+                return render(request, 'accounts/questionnaire.html', context)
+            
+            questionnaire.hobbies_interests = ','.join(hobbies_list)
+            questionnaire.save()
 
-        # Handle multiple choice fields (convert checkbox selections to comma-separated string)
-        questionnaire.hobbies = ','.join(request.POST.getlist('hobbies'))
-        questionnaire.college_events = ','.join(request.POST.getlist('college_events'))
-        questionnaire.weekend_plans = ','.join(request.POST.getlist('weekend_plans'))
-        
-        # Single choice fields
-        questionnaire.introvert_extrovert = data.get('introvert_extrovert')
-        questionnaire.first_meet = data.get('first_meet')
-        questionnaire.sleep_type = data.get('sleep_type')
-        questionnaire.important_trait = data.get('important_trait')
-        questionnaire.year = data.get('year')
-        questionnaire.comm_style = data.get('comm_style')
-        questionnaire.posting_frequency = data.get('posting_frequency')
-        questionnaire.free_time = data.get('free_time')
-
-        # Relationship fields
-        questionnaire.relationship_status = data.get('relationship_status')
-        questionnaire.dating_approach = data.get('dating_approach')
-        questionnaire.compatibility = data.get('compatibility')
-        questionnaire.similar_interests = data.get('similar_interests')
-        questionnaire.relationship_view = data.get('relationship_view')
-        questionnaire.looking_for = data.get('looking_for')
-
-        # Mark user as having completed the questionnaire
-        user.has_answered_questionnaire = True
-        user.save()
-        questionnaire.save()
-        
-        messages.success(request, "Your profile is complete! Let's find your matches.")
-        return redirect('feed:home')  # Or wherever you want to redirect
+            # Update profile and user
+            profile.has_answered_questionnaire = True
+            profile.save()
+            
+            user.has_answered_questionnaire = True
+            user.save()
+            
+            messages.success(request, "Your profile is set up! Let's find your vibe.")
+            return redirect('feed:home')  # Adjust redirect as needed
+            
+        except Exception as e:
+            messages.error(request, f"An error occurred: {str(e)}")
+            return render(request, 'accounts/questionnaire.html', context)
 
     else:
-        # Prefill the form if data exists
+        # Pre-populate form if questionnaire exists
         try:
             questionnaire = UserQuestionnaire.objects.get(user=user)
             context['questionnaire'] = questionnaire
-            
-            # Convert comma-separated strings back to lists for checkboxes
-            if questionnaire.hobbies:
-                context['selected_hobbies'] = questionnaire.hobbies.split(',')
-            if questionnaire.college_events:
-                context['selected_events'] = questionnaire.college_events.split(',')
-            if questionnaire.weekend_plans:
-                context['selected_weekends'] = questionnaire.weekend_plans.split(',')
-                
+            if questionnaire.hobbies_interests:
+                context['selected_hobbies'] = questionnaire.hobbies_interests.split(',')
         except UserQuestionnaire.DoesNotExist:
             pass
 
-    return render(request, 'questionnaire_form.html', context)
+    return render(request, 'accounts/questionnaire.html', context)
+
 @login_required
 def edit_profile(request):
     user = request.user

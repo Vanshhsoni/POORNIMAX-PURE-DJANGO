@@ -19,10 +19,13 @@ urlpatterns = [
     path('hearts/sent/', views.hearts_sent, name='hearts_sent'),
     path('hearts/received/', views.hearts_received, name='hearts_received'),
     path('friends/', views.friends_list, name='friends_list'),
-    path('confession/like/', views.like_confession, name='like_confession'),
-    path('confession/comment/', views.add_confession_comment, name='add_confession_comment'),
+    path('api/confession/like/', views.like_confession, name='like_confession'),
+    path('api/confession/comment/', views.add_confession_comment, name='add_confession_comment'),
     path('api/confession/<int:confession_id>/comments/', views.confession_comments_api, name='confession_comments_api'),
     path('confession/<int:confession_id>/comments/', views.get_confession_comments, name='get_confession_comments'),
-
-
+    path('get-home-updates/', views.get_home_updates, name='get_home_updates'),
+    path('profile/crush_action/<int:user_id>/', views.crush_action_profile, name='crush_action_profile'),
+    path('api/load-users/', views.load_users_api, name='load_users_api'),
+    path('api/search-users/', views.search_users_api, name='search_users_api'),
+    path('api/confession/<int:confession_id>/details/', views.get_confession_details_api, name='get_confession_details_api'),
 ]

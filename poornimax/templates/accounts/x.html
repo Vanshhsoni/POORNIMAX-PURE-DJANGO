@@ -1,993 +1,468 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PoornimaX</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>About You | PoornimaX</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <style>
         :root {
-            --primary: #6c63ff;
-            --primary-light: #8f88ff;
-            --primary-dark: #5046e5;
-            --secondary: #ff6584;
-            --secondary-light: #ff85a2;
-            --bg: #f5f5f7;
-            --bg-card: #ffffff;
-            --bg-dark: #1f1f30;
-            --text: #333333;
-            --text-light: #787878;
-            --shadow: rgba(0, 0, 0, 0.1);
-            --radius: 12px;
-            --transition: all 0.3s ease;
+            --primary: #3b82f6; --primary-light: #60a5fa;
+            --bg: #f8f9fa; --bg-card: #ffffff;
+            --text: #1f2937; --text-light: #6c757d;
+            --border: #e9ecef; --shadow: rgba(0, 0, 0, 0.08);
+            --radius: 12px; --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', 'Segoe UI', sans-serif;
-        }
-
-        body {
-            background: radial-gradient(circle, var(--bg) 30%, #e8e8e8 100%);
-            color: var(--text);
-            min-height: 100vh;
-            position: relative;
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { 
+            background-color: var(--bg); 
+            color: var(--text); 
+            min-height: 100vh; 
+            padding: 20px; 
+            position: relative; 
             overflow-x: hidden;
-        }
-
-        /* Loading Screen */
-        .loader-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #fff;
             display: flex;
+            align-items: center;
             justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            opacity: 1;
-            visibility: visible;
-            transition: opacity 0.6s ease-in-out, visibility 0.6s ease-in-out;
         }
 
-        .loader {
-            width: 80px;
-            height: 40px;
-            display: flex;
-        }
+        .loader-container { position: fixed; inset: 0; background-color: var(--bg); display: grid; place-items: center; z-index: 1000; transition: opacity 0.5s ease-out, visibility 0.5s ease-out; }
+        .loader { display: flex; gap: 8px; }
+        .loader div { width: 12px; height: 12px; border-radius: 50%; background-color: var(--primary); animation: pulse 1.4s ease-in-out infinite both; }
+        .loader div:nth-child(1) { animation-delay: -0.32s; }
+        .loader div:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes pulse { 0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; } 40% { transform: scale(1.0); opacity: 1; } }
 
-        .loader:before,
-        .loader:after {
-            content: "";
-            margin: 0 -2px 0 0;
-            flex: 1;
-            --c: no-repeat linear-gradient(var(--primary) 0 0);
-            background: var(--c), var(--c), var(--c), var(--c);
-            animation: l13-1 1s infinite linear, l13-2 1s infinite linear;
-        }
+        .background-blobs { position: fixed; inset: 0; z-index: -1; }
+        .blob { position: absolute; border-radius: 50%; opacity: 0.6; filter: blur(90px); animation: drift 40s infinite linear alternate; }
+        .blob.blue { background: #aed6f1; }
+        .blob.purple { background: #d5bcf0; animation-duration: 50s; }
+        .blob:nth-of-type(1) { width: 400px; height: 400px; top: -150px; left: -200px; }
+        .blob:nth-of-type(2) { width: 300px; height: 300px; bottom: -150px; right: -150px; animation-direction: alternate-reverse; }
+        @keyframes drift { from { transform: rotate(0deg) scale(1) translateX(-30px); } to { transform: rotate(360deg) scale(1.2) translateX(30px); } }
 
-        .loader:after {
-            transform: scale(-1);
-            margin: 0 0 0 -2px;
+        .container { 
+            background: var(--bg-card); 
+            border-radius: var(--radius); 
+            box-shadow: 0 8px 32px var(--shadow); 
+            width: 100%; 
+            max-width: 800px; 
+            padding: 30px; 
+            text-align: center; 
+            border: 1px solid var(--border);
+            margin: auto;
+            max-height: 90vh;
+            overflow-y: auto;
         }
-
-        @keyframes l13-1 {
-            0%, 3%   {background-size: 0 4px, 4px 0, 0 4px, 4px 0;}
-            12.5%    {background-size: 50% 4px, 4px 0, 0 4px, 4px 0;}
-            25%      {background-size: 50% 4px, 4px 50%, 0 4px, 4px 0;}
-            37.5%    {background-size: 50% 4px, 4px 50%, 50% 4px, 4px 0;}
-            46%, 54% {background-size: 50% 4px, 4px 50%, 50% 4px, 4px 50%;}
-            62.5%    {background-size: 0 4px, 4px 50%, 50% 4px, 4px 50%;}
-            75%      {background-size: 0 4px, 4px 0, 50% 4px, 4px 50%;}
-            87.5%    {background-size: 0 4px, 4px 0, 0 4px, 4px 50%;}
-            96%,100% {background-size: 0 4px, 4px 0, 0 4px, 4px 0;}
+        
+        h1 { color: var(--text); font-size: 1.8rem; font-weight: 700; margin-bottom: 8px; }
+        h2 { color: var(--text-light); font-size: 1rem; font-weight: 400; margin-bottom: 30px; }
+        
+        .progress-bar { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 30px; 
+            position: relative; 
         }
-
-        @keyframes l13-2 {
-            0%,49.9%  {background-position: 0 20px, 50% 20px, 20px 100%, 100% 100%;}
-            50%,100%  {background-position: right 20px top 20px, 50% 100%, 100% 100%, 100% 20px;}
+        .progress-bar .step { display: flex; flex-direction: column; align-items: center; flex: 1; }
+        .progress-bar .step .icon { 
+            width: 32px; 
+            height: 32px; 
+            border-radius: 50%; 
+            background: var(--bg); 
+            border: 2px solid var(--border); 
+            display: grid; 
+            place-items: center; 
+            font-weight: 600; 
+            color: var(--text-light); 
+            transition: var(--transition); 
+            z-index: 2; 
+            font-size: 0.9rem;
         }
+        .progress-bar .step .text { font-size: 0.75rem; font-weight: 500; color: var(--text-light); margin-top: 6px; }
+        .progress-bar .step.active .icon { border-color: var(--primary); background: var(--primary); color: white; }
+        .progress-bar::before { content: ''; position: absolute; top: 15px; left: 0; width: 100%; height: 2px; background: var(--border); z-index: 1; }
+        #progress { position: absolute; top: 15px; left: 0; width: 0%; height: 2px; background: var(--primary); z-index: 1; transition: width 0.4s ease; }
 
-        /* Particle Background */
-        #particles-js {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            opacity: 0.5;
+        .form-outer { 
+            overflow: hidden; 
+            margin-bottom: 30px;
         }
-
-        /* Header */
-        header {
-            text-align: center;
-            padding: 40px 20px;
-            border-bottom: 1px solid rgba(108, 99, 255, 0.2);
-            position: relative;
-        }
-
-        header h1 {
-            background: linear-gradient(45deg, var(--primary), var(--primary-light));
-            background-clip: text;
-            -webkit-background-clip: text;
-            color: transparent;
-            font-size: 2.5rem;
-            font-weight: 600;
-            letter-spacing: 2px;
-        }
-
-        .header-subtitle {
-            color: var(--text-light);
-            font-style: italic;
-            margin-top: 5px;
-            font-size: 1rem;
-        }
-
-        /* Main Container */
-        .main-container {
-            max-width: 900px;
-            margin: 20px auto 80px;
-            padding: 0 20px;
-        }
-
-        /* Section Styles */
-        .section {
-            background: var(--bg-card);
-            border-radius: var(--radius);
-            box-shadow: 0 10px 30px var(--shadow);
-            padding: 30px;
-            margin-bottom: 40px;
-            position: relative;
-            overflow: hidden;
+        #multiStepForm { 
+            display: flex; 
+            width: 300%; 
             transition: var(--transition);
         }
-
-        .section:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(108, 99, 255, 0.15);
+        .form-step { 
+            width: calc(100% / 3); 
+            padding: 0 10px; 
+            text-align: left; 
         }
-
-        .section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 5px;
-            height: 100%;
-            background: linear-gradient(to bottom, var(--primary), var(--secondary));
-        }
-
-        .section-title {
-            font-size: 1.8rem;
-            color: var(--primary-dark);
-            margin-bottom: 25px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .section-icon {
-            width: 30px;
-            height: 30px;
-            fill: var(--primary);
-        }
-
-        /* Question Styles */
-        .question {
-            background: rgba(245, 245, 247, 0.5);
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            transition: var(--transition);
-        }
-
-        .question:hover {
-            background: rgba(245, 245, 247, 0.9);
-        }
-
-        .question-title {
-            font-size: 1.2rem;
+        .question:not(:last-child) { margin-bottom: 30px; }
+        .question-title { 
+            font-weight: 600; 
+            font-size: 1.1rem; 
+            margin-bottom: 20px; 
+            text-align: center; 
             color: var(--text);
-            margin-bottom: 15px;
-            font-weight: 500;
         }
 
-        /* Input Styles */
-        .text-input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: var(--transition);
-            margin-top: 5px;
+        .card-options { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); 
+            gap: 12px; 
+            max-width: 100%;
         }
-
-        .text-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(108, 99, 255, 0.2);
+        
+        .card-options.large-grid {
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
         }
-
-        /* Radio Options */
-        .options {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 10px;
-        }
-
-        .radio-option {
-            position: relative;
-            cursor: pointer;
-        }
-
-        .radio-option input[type="radio"] {
-            position: absolute;
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .radio-label {
+        
+        .card-label { 
+            padding: 14px 12px; 
+            border: 2px solid var(--border); 
+            border-radius: var(--radius); 
+            cursor: pointer; 
+            transition: var(--transition); 
+            text-align: center; 
+            font-weight: 500; 
+            font-size: 0.9rem;
             display: block;
-            padding: 10px 15px;
-            background: white;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            transition: var(--transition);
-            font-size: 0.95rem;
+            word-wrap: break-word;
+            hyphens: auto;
         }
-
-        .radio-option input[type="radio"]:checked + .radio-label {
-            background: rgba(108, 99, 255, 0.1);
-            border-color: var(--primary);
-            color: var(--primary-dark);
-            font-weight: 500;
+        .card-label:hover { 
+            border-color: var(--primary-light); 
+            background: #fafdff; 
+            transform: translateY(-1px);
         }
-
-        .radio-option input[type="radio"]:focus + .radio-label {
-            box-shadow: 0 0 0 2px rgba(108, 99, 255, 0.3);
+        .card-input { display: none; }
+        .card-input:checked + .card-label { 
+            border-color: var(--primary); 
+            background-color: #f0f6fe; 
+            color: var(--primary); 
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); 
         }
-
-        .radio-label:hover {
-            border-color: var(--primary-light);
+        
+        .btn-group { 
+            display: flex; 
+            justify-content: space-between; 
+            gap: 15px;
+            margin-top: 20px;
         }
-
-        /* Submit Button */
-        .submit-container {
-            text-align: center;
-            margin-top: 40px;
+        .btn { 
+            background: var(--primary); 
+            color: #ffffff; 
+            padding: 12px 24px; 
+            border-radius: 8px; 
+            border: 2px solid var(--primary); 
+            font-size: 1rem; 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: var(--transition); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            gap: 8px; 
+            position: relative; 
+            flex: 1;
+            min-height: 44px;
         }
-
-        .submit-btn {
-            background: linear-gradient(45deg, var(--primary-dark), var(--primary));
-            color: white;
-            padding: 14px 40px;
-            border-radius: 30px;
-            border: none;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: var(--transition);
-            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.3);
+        .btn-prev { 
+            background: transparent; 
+            color: var(--text); 
+            border-color: var(--border); 
         }
-
-        .submit-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(108, 99, 255, 0.5);
+        .btn:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.15); 
         }
-
-        /* Footer */
-        .footer {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background: linear-gradient(90deg, var(--primary-dark), var(--primary));
-            color: white;
-            text-align: center;
-            padding: 15px 0;
-            font-size: 1rem;
-            font-weight: 600;
-            letter-spacing: 3px;
-            box-shadow: 0 -5px 20px rgba(108, 99, 255, 0.2);
+        .btn-prev:hover { 
+            background-color: var(--bg); 
+            border-color: var(--text-light); 
         }
+        .btn:disabled { 
+            opacity: 0.6; 
+            cursor: not-allowed; 
+            transform: none; 
+            box-shadow: none; 
+        }
+        .btn-spinner { 
+            width: 20px; 
+            height: 20px; 
+            border: 2px solid rgba(255, 255, 255, 0.4); 
+            border-top-color: #ffffff; 
+            border-radius: 50%; 
+            animation: spin 1s linear infinite; 
+            display: none; 
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        button.btn--loading { cursor: wait; pointer-events: none; color: transparent !important; }
+        button.btn--loading .btn-spinner { display: block; position: absolute; }
 
-        /* Responsive adjustments */
+        .footer { 
+            position: fixed; 
+            bottom: 0; 
+            width: 100%; 
+            background-color: rgba(255, 255, 255, 0.9); 
+            backdrop-filter: blur(5px); 
+            border-top: 1px solid var(--border); 
+            color: var(--text-light); 
+            text-align: center; 
+            padding: 12px 0; 
+            font-size: 0.8rem; 
+            font-weight: 600; 
+            letter-spacing: 2px; 
+            z-index: 5; 
+        }
+        
         @media (max-width: 768px) {
-            .options {
-                grid-template-columns: 1fr;
+            .container { 
+                padding: 25px 20px; 
+                margin: 10px;
+                max-height: 85vh;
             }
-            
-            .section {
-                padding: 20px;
+            h1 { font-size: 1.6rem; }
+            h2 { font-size: 0.9rem; }
+            .card-options { 
+                grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); 
+                gap: 10px;
             }
-            
-            .section-title {
-                font-size: 1.5rem;
+            .card-options.large-grid {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            }
+            .card-label {
+                padding: 12px 10px;
+                font-size: 0.85rem;
+            }
+            .question-title {
+                font-size: 1rem;
+            }
+            .btn {
+                padding: 10px 16px;
+                font-size: 0.9rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px 15px;
+                margin: 5px;
+            }
+            .card-options { 
+                grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); 
+            }
+            .card-options.large-grid {
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            }
+            .progress-bar .step .text { font-size: 0.7rem; }
+            .btn-group { 
+                flex-direction: column; 
+                gap: 10px;
             }
         }
     </style>
 </head>
-
 <body>
-    <!-- Loading Screen -->
-    <div class="loader-container">
-        <div class="loader"></div>
+    <div class="loader-container" id="loaderContainer">
+        <div class="loader"><div></div><div></div><div></div></div>
+    </div>
+    <div class="background-blobs">
+        <div class="blob blue"></div><div class="blob purple"></div>
     </div>
 
-    <!-- Particle Background -->
-    <div id="particles-js"></div>
+    <main class="container">
+        <h1>Tell Us About Yourself</h1>
+        <h2>This helps us find the best connections for you.</h2>
 
-    <header>
-        <h1>PoornimaX</h1>
-        <div class="header-subtitle">Let's find your perfect connection</div>
-    </header>
-
-    <div class="main-container">
-        <form method="POST" action="{% url 'accounts:questionnaire_view' %}">
-            {% csrf_token %}
-            
-            <!-- Interests Section -->
-            <!-- Interests Section -->
-<div class="section" id="interests-section">
-    <h2 class="section-title">
-        <svg class="section-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-            <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zm0-2a8 8 0 100-16 8 8 0 000 16zm-1-5h2v2h-2v-2zm0-8h2v6h-2V7z"/>
-        </svg>
-        Tell Us About You
-    </h2>
-    
-    <div class="question">
-        <label class="question-title">What are your favorite hobbies?</label>
-        <p class="question-subtitle">Select all that apply</p>
-        <div class="checkbox-options">
-            <!-- Hobbies from the model -->
-            <label class="checkbox-option">
-                <input type="checkbox" name="hobbies" value="Photography">
-                <span class="checkbox-label">Photography</span>
-            </label>
-            <label class="checkbox-option">
-                <input type="checkbox" name="hobbies" value="Coding">
-                <span class="checkbox-label">Coding</span>
-            </label>
-            <label class="checkbox-option">
-                <input type="checkbox" name="hobbies" value="Gaming">
-                <span class="checkbox-label">Gaming</span>
-            </label>
-            <label class="checkbox-option">
-                <input type="checkbox" name="hobbies" value="Editing">
-                <span class="checkbox-label">Editing</span>
-            </label>
-            <label class="checkbox-option">
-                <input type="checkbox" name="hobbies" value="Designing">
-                <span class="checkbox-label">Designing</span>
-            </label>
-            <label class="checkbox-option">
-                <input type="checkbox" name="hobbies" value="Reading">
-                <span class="checkbox-label">Reading</span>
-            </label>
-            <label class="checkbox-option">
-                <input type="checkbox" name="hobbies" value="Music">
-                <span class="checkbox-label">Music</span>
-            </label>
-            <label class="checkbox-option">
-                <input type="checkbox" name="hobbies" value="Cooking">
-                <span class="checkbox-label">Cooking</span>
-            </label>
-            <label class="checkbox-option">
-                <input type="checkbox" name="hobbies" value="Traveling">
-                <span class="checkbox-label">Traveling</span>
-            </label>
-            <label class="checkbox-option">
-                <input type="checkbox" name="hobbies" value="Dancing">
-                <span class="checkbox-label">Dancing</span>
-            </label>
-            <label class="checkbox-option">
-                <input type="checkbox" name="hobbies" value="Singing">
-                <span class="checkbox-label">Singing</span>
-            </label>
-            <label class="checkbox-option">
-                <input type="checkbox" name="hobbies" value="Painting">
-                <span class="checkbox-label">Painting</span>
-            </label>
-            <label class="checkbox-option">
-                <input type="checkbox" name="hobbies" value="Fitness">
-                <span class="checkbox-label">Fitness</span>
-            </label>
-            <label class="checkbox-option">
-                <input type="checkbox" name="hobbies" value="Sports">
-                <span class="checkbox-label">Sports</span>
-            </label>
-            <label class="checkbox-option">
-                <input type="checkbox" name="hobbies" value="Hiking">
-                <span class="checkbox-label">Hiking</span>
-            </label>
-            <label class="checkbox-option">
-                <input type="checkbox" name="hobbies" value="Movies">
-                <span class="checkbox-label">Movies</span>
-            </label>
-            <label class="checkbox-option">
-                <input type="checkbox" name="hobbies" value="Anime">
-                <span class="checkbox-label">Anime</span>
-            </label>
-            <label class="checkbox-option">
-                <input type="checkbox" name="hobbies" value="Writing">
-                <span class="checkbox-label">Writing</span>
-            </label>
-            <label class="checkbox-option">
-                <input type="checkbox" name="hobbies" value="Driving">
-                <span class="checkbox-label">Driving</span>
-            </label>
+        <div class="progress-bar">
+            <div id="progress"></div>
+            <div class="step active"><div class="icon">1</div><div class="text">About You</div></div>
+            <div class="step"><div class="icon">2</div><div class="text">Your Vibe</div></div>
+            <div class="step"><div class="icon">3</div><div class="text">Connections</div></div>
         </div>
-    </div>
-    
-    <div class="question">
-        <label class="question-title">Which college events do you enjoy the most?</label>
-        <p class="question-subtitle">Select all that apply</p>
-        <div class="checkbox-options">
-            <!-- College events from the model -->
-            <label class="checkbox-option">
-                <input type="checkbox" name="college_events" value="Tech Fests">
-                <span class="checkbox-label">Tech Fests</span>
-            </label>
-            <label class="checkbox-option">
-                <input type="checkbox" name="college_events" value="Cultural Nights">
-                <span class="checkbox-label">Cultural Nights</span>
-            </label>
-            <label class="checkbox-option">
-                <input type="checkbox" name="college_events" value="Hackathons">
-                <span class="checkbox-label">Hackathons</span>
-            </label>
-            <label class="checkbox-option">
-                <input type="checkbox" name="college_events" value="Workshops">
-                <span class="checkbox-label">Workshops</span>
-            </label>
-            <label class="checkbox-option">
-                <input type="checkbox" name="college_events" value="Sports Competitions">
-                <span class="checkbox-label">Sports Competitions</span>
-            </label>
-            <label class="checkbox-option">
-                <input type="checkbox" name="college_events" value="Seminars">
-                <span class="checkbox-label">Seminars</span>
-            </label>
-            <label class="checkbox-option">
-                <input type="checkbox" name="college_events" value="Club Activities">
-                <span class="checkbox-label">Club Activities</span>
-            </label>
-            <label class="checkbox-option">
-                <input type="checkbox" name="college_events" value="Conferences">
-                <span class="checkbox-label">Conferences</span>
-            </label>
-            <label class="checkbox-option">
-                <input type="checkbox" name="college_events" value="Competitions">
-                <span class="checkbox-label">Competitions</span>
-            </label>
-            <label class="checkbox-option">
-                <input type="checkbox" name="college_events" value="Social Gatherings">
-                <span class="checkbox-label">Social Gatherings</span>
-            </label>
-            <label class="checkbox-option">
-                <input type="checkbox" name="college_events" value="Debates">
-                <span class="checkbox-label">Debates</span>
-            </label>
-        </div>
-    </div>
-    
-    <div class="question">
-        <label class="question-title">How do you typically spend your weekends?</label>
-        <p class="question-subtitle">Select all that apply</p>
-        <div class="checkbox-options">
-            <!-- Weekend activities from the model -->
-            <label class="checkbox-option">
-                <input type="checkbox" name="weekend_plans" value="City exploration">
-                <span class="checkbox-label">City exploration</span>
-            </label>
-            <label class="checkbox-option">
-                <input type="checkbox" name="weekend_plans" value="Movie marathons">
-                <span class="checkbox-label">Movie marathons</span>
-            </label>
-            <label class="checkbox-option">
-                <input type="checkbox" name="weekend_plans" value="Coffee shop work">
-                <span class="checkbox-label">Coffee shop work</span>
-            </label>
-            <label class="checkbox-option">
-                <input type="checkbox" name="weekend_plans" value="Dancing">
-                <span class="checkbox-label">Dancing</span>
-            </label>
-            <label class="checkbox-option">
-                <input type="checkbox" name="weekend_plans" value="Sleeping">
-                <span class="checkbox-label">Sleeping</span>
-            </label>
-            <label class="checkbox-option">
-                <input type="checkbox" name="weekend_plans" value="Family time">
-                <span class="checkbox-label">Family time</span>
-            </label>
-            <label class="checkbox-option">
-                <input type="checkbox" name="weekend_plans" value="Road trips">
-                <span class="checkbox-label">Road trips</span>
-            </label>
-            <label class="checkbox-option">
-                <input type="checkbox" name="weekend_plans" value="Gaming">
-                <span class="checkbox-label">Gaming</span>
-            </label>
-            <label class="checkbox-option">
-                <input type="checkbox" name="weekend_plans" value="Shopping">
-                <span class="checkbox-label">Shopping</span>
-            </label>
-            <label class="checkbox-option">
-                <input type="checkbox" name="weekend_plans" value="Partying">
-                <span class="checkbox-label">Partying</span>
-            </label>
-            <label class="checkbox-option">
-                <input type="checkbox" name="weekend_plans" value="Outdoor activities">
-                <span class="checkbox-label">Outdoor activities</span>
-            </label>
-        </div>
-    </div>
-</div>
 
-<style>
-    /* Added styles for the interests section */
-    .checkbox-options {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-top: 10px;
-    }
-    
-    .checkbox-option {
-        display: flex;
-        align-items: center;
-        background-color: #f0f0f0;
-        border-radius: 20px;
-        padding: 6px 16px;
-        cursor: pointer;
-        transition: background-color 0.2s;
-    }
-    
-    .checkbox-option:hover {
-        background-color: #e0e0e0;
-    }
-    
-    .checkbox-option input[type="checkbox"] {
-        margin-right: 8px;
-    }
-    
-    .checkbox-option input[type="checkbox"]:checked + .checkbox-label {
-        font-weight: 600;
-    }
-    
-    .checkbox-option input[type="checkbox"]:checked {
-        accent-color: #4a7eff;
-    }
-    
-    .question-subtitle {
-        font-size: 0.9rem;
-        color: #666;
-        margin-top: 0;
-        margin-bottom: 10px;
-    }
-</style>
-            
-            <!-- Personality Section -->
-            <div class="section">
-                <h2 class="section-title">
-                    <svg class="section-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                        <path d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2zm0 2a8 8 0 100 16 8 8 0 000-16zm0 4a4 4 0 110 8 4 4 0 010-8z"/>
-                    </svg>
-                    Your Personality Profile
-                </h2>
+        <div class="form-outer">
+            <form method="POST" action="{% url 'accounts:questionnaire_view' %}" id="multiStepForm">
+                {% csrf_token %}
                 
-                <div class="question">
-                    <p class="question-title">How would you describe your social energy?</p>
-                    <div class="options">
-                        <label class="radio-option">
-                            <input required type="radio" name="introvert_extrovert" value="Introvert" {% if questionnaire.introvert_extrovert == "Introvert" %}checked{% endif %}>
-                            <span class="radio-label">Introvert</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="introvert_extrovert" value="Extrovert" {% if questionnaire.introvert_extrovert == "Extrovert" %}checked{% endif %}>
-                            <span class="radio-label">Extrovert</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="introvert_extrovert" value="Ambivert" {% if questionnaire.introvert_extrovert == "Ambivert" %}checked{% endif %}>
-                            <span class="radio-label">Ambivert</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="introvert_extrovert" value="Reserved" {% if questionnaire.introvert_extrovert == "Reserved" %}checked{% endif %}>
-                            <span class="radio-label">Reserved</span>
-                        </label>
+                <div class="form-step">
+                    <div class="question">
+                        <h3 class="question-title">Your social energy is more...</h3>
+                        <div class="card-options">
+                            <div><input type="radio" name="personality" value="Introvert" id="p-1" class="card-input" required><label for="p-1" class="card-label">Introvert</label></div>
+                            <div><input type="radio" name="personality" value="Extrovert" id="p-2" class="card-input" required><label for="p-2" class="card-label">Extrovert</label></div>
+                            <div><input type="radio" name="personality" value="A mix of both" id="p-3" class="card-input" required><label for="p-3" class="card-label">A mix of both</label></div>
+                        </div>
+                    </div>
+                    <div class="question">
+                        <h3 class="question-title">You prefer to communicate via...</h3>
+                        <div class="card-options">
+                            <div><input type="radio" name="communication_style" value="Mostly texting" id="c-1" class="card-input" required><label for="c-1" class="card-label">Mostly texting</label></div>
+                            <div><input type="radio" name="communication_style" value="Voice & video calls" id="c-2" class="card-input" required><label for="c-2" class="card-label">Voice & video calls</label></div>
+                            <div><input type="radio" name="communication_style" value="A bit of everything" id="c-3" class="card-input" required><label for="c-3" class="card-label">A bit of everything</label></div>
+                        </div>
                     </div>
                 </div>
-                
-                <div class="question">
-                    <p class="question-title">Your ideal first meet-up would be:</p>
-                    <div class="options">
-                        <label class="radio-option">
-                            <input required type="radio" name="first_meet" value="Café conversation" {% if questionnaire.first_meet == "Café conversation" %}checked{% endif %}>
-                            <span class="radio-label">Café conversation</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="first_meet" value="Quiet study spot" {% if questionnaire.first_meet == "Quiet study spot" %}checked{% endif %}>
-                            <span class="radio-label">Quiet study spot</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="first_meet" value="Campus stroll" {% if questionnaire.first_meet == "Campus stroll" %}checked{% endif %}>
-                            <span class="radio-label">Campus stroll</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="first_meet" value="College event" {% if questionnaire.first_meet == "College event" %}checked{% endif %}>
-                            <span class="radio-label">College event</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="first_meet" value="Virtual hangout" {% if questionnaire.first_meet == "Virtual hangout" %}checked{% endif %}>
-                            <span class="radio-label">Virtual hangout</span>
-                        </label>
-                    </div>
-                </div>
-                
-                <div class="question">
-                    <p class="question-title">Are you more productive at night or during the day?</p>
-                    <div class="options">
-                        <label class="radio-option">
-                            <input required type="radio" name="sleep_type" value="Night owl" {% if questionnaire.sleep_type == "Night owl" %}checked{% endif %}>
-                            <span class="radio-label">Night owl</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="sleep_type" value="Early bird" {% if questionnaire.sleep_type == "Early bird" %}checked{% endif %}>
-                            <span class="radio-label">Early bird</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="sleep_type" value="Adaptable to both" {% if questionnaire.sleep_type == "Adaptable to both" %}checked{% endif %}>
-                            <span class="radio-label">Adaptable to both</span>
-                        </label>
-                    </div>
-                </div>
-                
-                <div class="question">
-                    <p class="question-title">What quality draws you most to someone?</p>
-                    <div class="options">
-                        <label class="radio-option">
-                            <input required type="radio" name="important_trait" value="Appearance" {% if questionnaire.important_trait == "Appearance" %}checked{% endif %}>
-                            <span class="radio-label">Appearance</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="important_trait" value="Energy/Vibe" {% if questionnaire.important_trait == "Energy/Vibe" %}checked{% endif %}>
-                            <span class="radio-label">Energy/Vibe</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="important_trait" value="Communication" {% if questionnaire.important_trait == "Communication" %}checked{% endif %}>
-                            <span class="radio-label">Communication</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="important_trait" value="Ambition" {% if questionnaire.important_trait == "Ambition" %}checked{% endif %}>
-                            <span class="radio-label">Ambition</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="important_trait" value="Humor" {% if questionnaire.important_trait == "Humor" %}checked{% endif %}>
-                            <span class="radio-label">Humor</span>
-                        </label>
-                    </div>
-                </div>
-                
-                <div class="question">
-                    <p class="question-title">Which year of college are you in?</p>
-                    <div class="options">
-                        <label class="radio-option">
-                            <input required type="radio" name="year" value="1st Year" {% if questionnaire.year == "1st Year" %}checked{% endif %}>
-                            <span class="radio-label">1st Year</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="year" value="2nd Year" {% if questionnaire.year == "2nd Year" %}checked{% endif %}>
-                            <span class="radio-label">2nd Year</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="year" value="3rd Year" {% if questionnaire.year == "3rd Year" %}checked{% endif %}>
-                            <span class="radio-label">3rd Year</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="year" value="Final Year" {% if questionnaire.year == "Final Year" %}checked{% endif %}>
-                            <span class="radio-label">Final Year</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="year" value="Postgraduate" {% if questionnaire.year == "Postgraduate" %}checked{% endif %}>
-                            <span class="radio-label">Postgraduate</span>
-                        </label>
-                    </div>
-                </div>
-                
-                <div class="question">
-                    <p class="question-title">How would you describe your communication style?</p>
-                    <div class="options">
-                        <label class="radio-option">
-                            <input required type="radio" name="comm_style" value="Short & direct" {% if questionnaire.comm_style == "Short & direct" %}checked{% endif %}>
-                            <span class="radio-label">Short & direct</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="comm_style" value="Visual & expressive" {% if questionnaire.comm_style == "Visual & expressive" %}checked{% endif %}>
-                            <span class="radio-label">Visual & expressive</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="comm_style" value="Thoughtful & deep" {% if questionnaire.comm_style == "Thoughtful & deep" %}checked{% endif %}>
-                            <span class="radio-label">Thoughtful & deep</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="comm_style" value="Voice messages" {% if questionnaire.comm_style == "Voice messages" %}checked{% endif %}>
-                            <span class="radio-label">Voice messages</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="comm_style" value="Video/voice calls" {% if questionnaire.comm_style == "Video/voice calls" %}checked{% endif %}>
-                            <span class="radio-label">Video/voice calls</span>
-                        </label>
-                    </div>
-                </div>
-                
-                <div class="question">
-                    <p class="question-title">What's your relationship with social media?</p>
-                    <div class="options">
-                        <label class="radio-option">
-                            <input required type="radio" name="posting_frequency" value="Minimal presence" {% if questionnaire.posting_frequency == "Minimal presence" %}checked{% endif %}>
-                            <span class="radio-label">Minimal presence</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="posting_frequency" value="Occasional updates" {% if questionnaire.posting_frequency == "Occasional updates" %}checked{% endif %}>
-                            <span class="radio-label">Occasional updates</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="posting_frequency" value="Active participant" {% if questionnaire.posting_frequency == "Active participant" %}checked{% endif %}>
-                            <span class="radio-label">Active participant</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="posting_frequency" value="Daily contributor" {% if questionnaire.posting_frequency == "Daily contributor" %}checked{% endif %}>
-                            <span class="radio-label">Daily contributor</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="posting_frequency" value="Meaningful moments only" {% if questionnaire.posting_frequency == "Meaningful moments only" %}checked{% endif %}>
-                            <span class="radio-label">Meaningful moments only</span>
-                        </label>
-                    </div>
-                </div>
-                
-                <div class="question">
-                    <p class="question-title">Your ideal free time is spent:</p>
-                    <div class="options">
-                        <label class="radio-option">
-                            <input required type="radio" name="free_time" value="On personal interests" {% if questionnaire.free_time == "On personal interests" %}checked{% endif %}>
-                            <span class="radio-label">On personal interests</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="free_time" value="Socializing with friends" {% if questionnaire.free_time == "Socializing with friends" %}checked{% endif %}>
-                            <span class="radio-label">Socializing with friends</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="free_time" value="Discovering new things" {% if questionnaire.free_time == "Discovering new things" %}checked{% endif %}>
-                            <span class="radio-label">Discovering new things</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="free_time" value="On creative pursuits" {% if questionnaire.free_time == "On creative pursuits" %}checked{% endif %}>
-                            <span class="radio-label">On creative pursuits</span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Connections Section -->
-            <div class="section">
-                <h2 class="section-title">
-                    <svg class="section-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                        <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
-                    </svg>
-                    Relationship Preferences
-                </h2>
-                
-                <div class="question">
-                    <p class="question-title">Your current relationship status</p>
-                    <div class="options">
-                        <label class="radio-option">
-                            <input required type="radio" name="relationship_status" value="Single" {% if questionnaire.relationship_status == "Single" %}checked{% endif %}>
-                            <span class="radio-label">Single</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="relationship_status" value="In a relationship" {% if questionnaire.relationship_status == "In a relationship" %}checked{% endif %}>
-                            <span class="radio-label">In a relationship</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="relationship_status" value="It's complicated" {% if questionnaire.relationship_status == "It's complicated" %}checked{% endif %}>
-                            <span class="radio-label">It's complicated</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="relationship_status" value="Prefer not to say" {% if questionnaire.relationship_status == "Prefer not to say" %}checked{% endif %}>
-                            <span class="radio-label">Prefer not to say</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="relationship_status" value="Open relationship" {% if questionnaire.relationship_status == "Open relationship" %}checked{% endif %}>
-                            <span class="radio-label">Open relationship</span>
-                        </label>
-                    </div>
-                </div>
-                
-                <div class="question">
-                    <p class="question-title">On PoornimaX, I'm looking for:</p>
-                    <div class="options">
-                        <label class="radio-option">
-                            <input required type="radio" name="looking_for" value="Girlfriend" {% if questionnaire.looking_for == "Girlfriend" %}checked{% endif %}>
-                            <span class="radio-label">Girlfriend</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="looking_for" value="Boyfriend" {% if questionnaire.looking_for == "Boyfriend" %}checked{% endif %}>
-                            <span class="radio-label">Boyfriend</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="looking_for" value="Friendship" {% if questionnaire.looking_for == "Friendship" %}checked{% endif %}>
-                            <span class="radio-label">Friendship</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="looking_for" value="Best friend" {% if questionnaire.looking_for == "Best friend" %}checked{% endif %}>
-                            <span class="radio-label">Best friend</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="looking_for" value="Study partner" {% if questionnaire.looking_for == "Study partner" %}checked{% endif %}>
-                            <span class="radio-label">Study partner</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="looking_for" value="Serious relationship" {% if questionnaire.looking_for == "Serious relationship" %}checked{% endif %}>
-                            <span class="radio-label">Serious relationship</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="looking_for" value="Casual connection" {% if questionnaire.looking_for == "Casual connection" %}checked{% endif %}>
-                            <span class="radio-label">Casual connection</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="looking_for" value="Friends with benefits" {% if questionnaire.looking_for == "Friends with benefits" %}checked{% endif %}>
-                            <span class="radio-label">Friends with benefits</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="looking_for" value="No expectations" {% if questionnaire.looking_for == "No expectations" %}checked{% endif %}>
-                            <span class="radio-label">No expectations</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="looking_for" value="Still figuring it out" {% if questionnaire.looking_for == "Still figuring it out" %}checked{% endif %}>
-                            <span class="radio-label">Still figuring it out</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="looking_for" value="Interesting conversations" {% if questionnaire.looking_for == "Interesting conversations" %}checked{% endif %}>
-                            <span class="radio-label">Interesting conversations</span>
-                        </label>
-                    </div>
-                </div>
-                
-                <div class="question">
-                    <p class="question-title">Your approach to dating or connections:</p>
-                    <div class="options">
-                        <label class="radio-option">
-                            <input required type="radio" name="dating_approach" value="Building gradually" {% if questionnaire.dating_approach == "Building gradually" %}checked{% endif %}>
-                            <span class="radio-label">Building gradually</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="dating_approach" value="Jumping right in" {% if questionnaire.dating_approach == "Jumping right in" %}checked{% endif %}>
-                            <span class="radio-label">Jumping right in</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="dating_approach" value="Seeking lasting connection" {% if questionnaire.dating_approach == "Seeking lasting connection" %}checked{% endif %}>
-                            <span class="radio-label">Seeking lasting connection</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="dating_approach" value="Keeping it light" {% if questionnaire.dating_approach == "Keeping it light" %}checked{% endif %}>
-                            <span class="radio-label">Keeping it light</span>
-                        </label>
-                    </div>
-                </div>
-                
-                <div class="question">
-                    <p class="question-title">How important is compatibility to you?</p>
-                    <div class="options">
-                        <label class="radio-option">
-                            <input required type="radio" name="compatibility" value="Essential" {% if questionnaire.compatibility == "Essential" %}checked{% endif %}>
-                            <span class="radio-label">Essential</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="compatibility" value="Somewhat important" {% if questionnaire.compatibility == "Somewhat important" %}checked{% endif %}>
-                            <span class="radio-label">Somewhat important</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="compatibility" value="Open to differences" {% if questionnaire.compatibility == "Open to differences" %}checked{% endif %}>
-                            <span class="radio-label">Open to differences</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="compatibility" value="Not a priority" {% if questionnaire.compatibility == "Not a priority" %}checked{% endif %}>
-                            <span class="radio-label">Not a priority</span>
-                        </label>
-                    </div>
-                </div>
-                
-                <div class="question">
-                    <p class="question-title">Are shared interests important to you?</p>
-                    <div class="options">
-                        <label class="radio-option">
-                            <input required type="radio" name="similar_interests" value="Very important" {% if questionnaire.similar_interests == "Very important" %}checked{% endif %}>
-                            <span class="radio-label">Very important</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="similar_interests" value="Variety is interesting" {% if questionnaire.similar_interests == "Variety is interesting" %}checked{% endif %}>
-                            <span class="radio-label">Variety is interesting</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="similar_interests" value="Prefer complementary differences" {% if questionnaire.similar_interests == "Prefer complementary differences" %}checked{% endif %}>
-                            <span class="radio-label">Prefer complementary differences</span>
-                        </label>
-                    </div>
-                </div>
-                
-                <div class="question">
-                    <p class="question-title">Your perspective on relationships:</p>
-                    <div class="options">
-                        <label class="radio-option">
-                            <input required type="radio" name="relationship_view" value="Meaningful commitment" {% if questionnaire.relationship_view == "Meaningful commitment" %}checked{% endif %}>
-                            <span class="radio-label">Meaningful commitment</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="relationship_view" value="Light and casual" {% if questionnaire.relationship_view == "Light and casual" %}checked{% endif %}>
-                            <span class="radio-label">Light and casual</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="relationship_view" value="Still discovering" {% if questionnaire.relationship_view == "Still discovering" %}checked{% endif %}>
-                            <span class="radio-label">Still discovering</span>
-                        </label>
-                        <label class="radio-option">
-                            <input required type="radio" name="relationship_view" value="It's about the experience" {% if questionnaire.relationship_view == "It's about the experience" %}checked{% endif %}>
-                            <span class="radio-label">It's about the experience</span>
-                        </label>
-                    </div>
-                </div>
-            </div>
 
-            <div class="submit-container">
-                <button type="submit" class="submit-btn">Find My Matches</button>
-            </div>
-        </form>
-    </div>
-    
-    <div class="footer">
-        YOU KNOW WHO I AM
-    </div>
+                <div class="form-step">
+                    <div class="question">
+                        <h3 class="question-title">What are some of your interests? (Select up to 5)</h3>
+                        <div class="card-options large-grid">
+                            <div><input type="checkbox" name="hobbies_interests" value="Gaming" id="h-1" class="card-input"><label for="h-1" class="card-label">Gaming</label></div>
+                            <div><input type="checkbox" name="hobbies_interests" value="Music" id="h-2" class="card-input"><label for="h-2" class="card-label">Music</label></div>
+                            <div><input type="checkbox" name="hobbies_interests" value="Movies & Shows" id="h-3" class="card-input"><label for="h-3" class="card-label">Movies & Shows</label></div>
+                            <div><input type="checkbox" name="hobbies_interests" value="Coding" id="h-4" class="card-input"><label for="h-4" class="card-label">Coding</label></div>
+                            <div><input type="checkbox" name="hobbies_interests" value="Sports" id="h-5" class="card-input"><label for="h-5" class="card-label">Sports</label></div>
+                            <div><input type="checkbox" name="hobbies_interests" value="Art & Design" id="h-6" class="card-input"><label for="h-6" class="card-label">Art & Design</label></div>
+                            <div><input type="checkbox" name="hobbies_interests" value="Reading" id="h-7" class="card-input"><label for="h-7" class="card-label">Reading</label></div>
+                            <div><input type="checkbox" name="hobbies_interests" value="Travel" id="h-8" class="card-input"><label for="h-8" class="card-label">Travel</label></div>
+                            <div><input type="checkbox" name="hobbies_interests" value="Foodie" id="h-9" class="card-input"><label for="h-9" class="card-label">Foodie</label></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-step">
+                    <div class="question">
+                        <h3 class="question-title">What's your current academic year?</h3>
+                        <div class="card-options">
+                            <div><input type="radio" name="year" value="1st Year" id="y-1" class="card-input" required><label for="y-1" class="card-label">1st Year</label></div>
+                            <div><input type="radio" name="year" value="2nd Year" id="y-2" class="card-input" required><label for="y-2" class="card-label">2nd Year</label></div>
+                            <div><input type="radio" name="year" value="3rd Year" id="y-3" class="card-input" required><label for="y-3" class="card-label">3rd Year</label></div>
+                            <div><input type="radio" name="year" value="Final Year" id="y-4" class="card-input" required><label for="y-4" class="card-label">Final Year</label></div>
+                            <div><input type="radio" name="year" value="Postgraduate" id="y-5" class="card-input" required><label for="y-5" class="card-label">Postgraduate</label></div>
+                        </div>
+                    </div>
+                    <div class="question">
+                        <h3 class="question-title">Your relationship status is...</h3>
+                        <div class="card-options">
+                            <div><input type="radio" name="relationship_status" value="Single" id="rs-1" class="card-input" required><label for="rs-1" class="card-label">Single</label></div>
+                            <div><input type="radio" name="relationship_status" value="Taken" id="rs-2" class="card-input" required><label for="rs-2" class="card-label">Taken</label></div>
+                            <div><input type="radio" name="relationship_status" value="It's Complicated" id="rs-3" class="card-input" required><label for="rs-3" class="card-label">It's Complicated</label></div>
+                            <div><input type="radio" name="relationship_status" value="Focusing on me" id="rs-4" class="card-input" required><label for="rs-4" class="card-label">Focusing on me</label></div>
+                        </div>
+                    </div>
+                    <div class="question">
+                        <h3 class="question-title">And you're looking for...</h3>
+                        <div class="card-options large-grid">
+                            <div><input type="radio" name="looking_for" value="Friendship" id="lf-1" class="card-input" required><label for="lf-1" class="card-label">Friendship</label></div>
+                            <div><input type="radio" name="looking_for" value="Girlfriend" id="lf-2" class="card-input" required><label for="lf-2" class="card-label">Girlfriend</label></div>
+                            <div><input type="radio" name="looking_for" value="Boyfriend" id="lf-3" class="card-input" required><label for="lf-3" class="card-label">Boyfriend</label></div>
+                            <div><input type="radio" name="looking_for" value="Serious Relationship" id="lf-4" class="card-input" required><label for="lf-4" class="card-label">Serious Relationship</label></div>
+                            <div><input type="radio" name="looking_for" value="FWB" id="lf-5" class="card-input" required><label for="lf-5" class="card-label">FWB</label></div>
+                            <div><input type="radio" name="looking_for" value="Something Casual" id="lf-6" class="card-input" required><label for="lf-6" class="card-label">Something Casual</label></div>
+                            <div><input type="radio" name="looking_for" value="Let's see where it goes" id="lf-7" class="card-input" required><label for="lf-7" class="card-label">Let's see where it goes</label></div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn btn-prev" id="prevBtn" disabled>Previous</button>
+            <button class="btn" id="nextBtn">Next</button>
+        </div>
+    </main>
+
+    <footer class="footer">YOU KNOW WHO I AM</footer>
 
     <script>
-        // Loading screen animation
-        window.addEventListener("load", () => {
-            setTimeout(() => {
-                const loader = document.querySelector(".loader-container");
-                if (loader) {
-                    loader.style.opacity = "0";
-                    loader.style.visibility = "hidden";
+        document.addEventListener("DOMContentLoaded", () => {
+            const loaderContainer = document.getElementById("loaderContainer");
+            if (loaderContainer && loaderContainer.style.display !== 'none') {
+                setTimeout(() => {
+                    loaderContainer.style.opacity = '0';
+                    loaderContainer.addEventListener('transitionend', () => loaderContainer.style.display = 'none', { once: true });
+                }, 1000);
+            }
+
+            const multiStepForm = document.getElementById('multiStepForm');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const progress = document.getElementById('progress');
+            const steps = document.querySelectorAll('.progress-bar .step');
+            
+            let currentStep = 1;
+            const totalSteps = 3;
+
+            nextBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (validateStep(currentStep)) {
+                    if (currentStep < totalSteps) {
+                        currentStep++;
+                        updateForm();
+                    } else if (currentStep === totalSteps) {
+                        // ✅ FIX 2: Correctly submit the form
+                        const submitButton = document.getElementById('nextBtn');
+                        submitButton.classList.add('btn--loading');
+                        const spinner = document.createElement('div');
+                        spinner.className = 'btn-spinner';
+                        submitButton.innerHTML = ''; // Clear current text
+                        submitButton.appendChild(spinner);
+                        
+                        // This line now correctly submits the form to your Django view
+                        multiStepForm.submit();
+                    }
                 }
-            }, 1500); // Reduced to 1.5 seconds for better UX
-        });
-        
-        // Initialize particles.js
-        particlesJS("particles-js", {
-            particles: {
-                number: { value: 80, density: { enable: true, value_area: 800 } },
-                color: { value: "#6c63ff" },
-                shape: { type: "circle" },
-                opacity: { value: 0.5, random: false },
-                size: { value: 3, random: true },
-                line_linked: { enable: true, distance: 150, color: "#6c63ff", opacity: 0.4, width: 1 },
-                move: { enable: true, speed: 2, direction: "none", random: false, straight: false, out_mode: "out" }
-            },
-            interactivity: {
-                detect_on: "canvas",
-                events: {
-                    onhover: { enable: true, mode: "grab" },
-                    onclick: { enable: true, mode: "push" },
-                    resize: true
+            });
+
+            prevBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (currentStep > 1) {
+                    currentStep--;
+                    updateForm();
                 }
-            },
-            retina_detect: true
+            });
+
+            function updateForm() {
+                multiStepForm.style.transform = `translateX(-${(currentStep - 1) * (100 / totalSteps)}%)`;
+                progress.style.width = `${((currentStep - 1) / (totalSteps - 1)) * 100}%`;
+                steps.forEach((step, index) => step.classList.toggle('active', index < currentStep));
+                prevBtn.disabled = currentStep === 1;
+                nextBtn.textContent = (currentStep === totalSteps) ? 'Finish & Find Matches' : 'Next';
+            }
+
+            function validateStep(step) {
+                const currentFormStep = multiStepForm.children[step - 1 + 1]; // Adjust index because of csrf_token
+                const questions = currentFormStep.querySelectorAll('.question');
+                let allValid = true;
+
+                questions.forEach(q => {
+                    const inputs = q.querySelectorAll('input[type="radio"], input[type="checkbox"]');
+                    const isRadio = inputs[0] && inputs[0].type === 'radio';
+                    const isChecked = Array.from(inputs).some(input => input.checked);
+
+                    if (isRadio && !isChecked) {
+                        q.style.border = '2px solid #dc3545';
+                        q.style.borderRadius = 'var(--radius)';
+                        q.style.padding = '10px';
+                        allValid = false;
+                        setTimeout(() => {
+                            q.style.border = 'none';
+                            q.style.padding = '0';
+                        }, 3000);
+                    } else {
+                        q.style.border = 'none';
+                        q.style.padding = '0';
+                    }
+                });
+                return allValid;
+            }
+
+            // Hobby selection limit
+            const hobbyCheckboxes = document.querySelectorAll('input[name="hobbies_interests"]');
+            const maxHobbies = 5;
+            hobbyCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', () => {
+                    const checkedCount = document.querySelectorAll('input[name="hobbies_interests"]:checked').length;
+                    if (checkedCount > maxHobbies) {
+                        checkbox.checked = false;
+                        alert(`You can select maximum ${maxHobbies} hobbies.`);
+                    }
+                });
+            });
         });
     </script>
 </body>
-
 </html>

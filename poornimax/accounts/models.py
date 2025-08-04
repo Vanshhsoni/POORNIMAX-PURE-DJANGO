@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.conf import settings
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 # College choices
 COLLEGE_CHOICES = [
@@ -53,6 +55,32 @@ class User(AbstractUser):
         return Crush.objects.filter(
             sender=self, receiver=other_user, is_mutual=True
         ).exists()
+
+
+# Profile Model - Single definition
+class Profile(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    has_answered_questionnaire = models.BooleanField(default=False)
+    # Add any other profile fields you need here
+    
+    def __str__(self):
+        return f'{self.user.username} Profile'
+
+
+# Signal to create Profile when User is created
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
+
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    try:
+        instance.profile.save()
+    except Profile.DoesNotExist:
+        Profile.objects.create(user=instance)
+
 
 # 💘 Crush Model
 class Crush(models.Model):
@@ -107,62 +135,44 @@ class Friendship(models.Model):
         return Friendship.objects.get_or_create(user1=user1, user2=user2)
 
 
-# Questionnaire Model
-# Questionnaire Model
+# UserQuestionnaire Model
 class UserQuestionnaire(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='questionnaire')
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='questionnaire')
 
-    # Set 1: Multiple Choice Inputs (stored as comma-separated text)
-    hobbies = models.TextField(blank=True)
-    college_events = models.TextField(blank=True)
-    weekend_plans = models.TextField(blank=True)
-    friendship_values = models.TextField(blank=True)
-    content_posting = models.TextField(blank=True)
-    college_excitements = models.TextField(blank=True)
-    learning_preferences = models.TextField(blank=True)
-    relaxation_methods = models.TextField(blank=True)
+    # Step 1: About You
+    personality = models.CharField(max_length=50, blank=True)
+    communication_style = models.CharField(max_length=50, blank=True)
 
-    # Set 2: Single Choice
-    introvert_extrovert = models.CharField(max_length=100, choices=[('Introvert', 'Introvert'), ('Extrovert', 'Extrovert'), ('Ambivert', 'Ambivert'), ('Shy', 'Shy')])
-    first_meet = models.CharField(max_length=100, choices=[('Canteen chai', 'Canteen chai'), ('Library talk', 'Library talk'), ('Random walk', 'Random walk'), ('Event hangout', 'Event hangout'), ('Virtual hangout (online)', 'Virtual hangout (online)')])
-    sleep_type = models.CharField(max_length=100, choices=[('Night owl', 'Night owl'), ('Early bird', 'Early bird'), ('Neither, depends on my mood', 'Neither, depends on my mood')])
-    important_trait = models.CharField(max_length=100, choices=[('Looks', 'Looks'), ('Vibe', 'Vibe'), ('Communication', 'Communication'), ('Ambition', 'Ambition'), ('Humor', 'Humor')])
-    year = models.CharField(max_length=100, choices=[('1st Year', '1st Year'), ('2nd Year', '2nd Year'), ('3rd Year', '3rd Year'), ('Final Year', 'Final Year'), ('Postgraduate', 'Postgraduate')])
-    comm_style = models.CharField(max_length=100, choices=[('Dry Texter', 'Dry Texter'), ('Emojis & Memes', 'Emojis & Memes'), ('Deep Conversations', 'Deep Conversations'), ('Voice Notes Lover', 'Voice Notes Lover'), ('Frequent Calls', 'Frequent Calls')])
-    posting_frequency = models.CharField(max_length=100, choices=[('Rarely', 'Rarely'), ('Occasionally', 'Occasionally'), ('Frequently', 'Frequently'), ('Almost daily', 'Almost daily'), ('Only when I have something important to share', 'Only when I have something important to share')])
-    decision_style = models.CharField(max_length=100, choices=[('Logically', 'Logically'), ('Emotionally', 'Emotionally'), ('Mix of both', 'Mix of both'), ('Impulsive', 'Impulsive')])
-    free_time = models.CharField(max_length=100, choices=[('Alone, doing my own thing', 'Alone, doing my own thing'), ('Hanging with friends', 'Hanging with friends'), ('Exploring new activities', 'Exploring new activities'), ('Doing something creative (art, writing, etc.)', 'Doing something creative (art, writing, etc.)')])
-
-    # Set 3: Relationship Intent
-    relationship_status = models.CharField(max_length=100, choices=[('Single', 'Single'), ('Taken', 'Taken'), ('It\'s complicated', 'It\'s complicated'), ('Not telling', 'Not telling'), ('In an open relationship', 'In an open relationship')])
-    dating_approach = models.CharField(max_length=100, choices=[('I like to take things slow', 'I like to take things slow'), ('I dive in quickly and see where it goes', 'I dive in quickly and see where it goes'), ('I prefer long-term commitment', 'I prefer long-term commitment'), ('I\'m just here for fun', 'I\'m just here for fun')])
-    compatibility = models.CharField(max_length=100, choices=[('Very important', 'Very important'), ('Somewhat important', 'Somewhat important'), ('I\'m open to exploring any kind of relationship', 'I\'m open to exploring any kind of relationship'), ('Not important at all', 'Not important at all')])
-    similar_interests = models.CharField(max_length=100, choices=[('Yes, definitely', 'Yes, definitely'), ('I\'m open to different interests', 'I\'m open to different interests'), ('I prefer finding someone with unique interests', 'I prefer finding someone with unique interests')])
-    relationship_view = models.CharField(max_length=100, choices=[('Serious commitment', 'Serious commitment'), ('Fun and casual', 'Fun and casual'), ('I\'m unsure', 'I\'m unsure'), ('Just enjoying the journey', 'Just enjoying the journey')])
-    looking_for = models.CharField(max_length=100, choices=[
+    # Step 2: Your Vibe
+    hobbies_interests = models.TextField(blank=True)
+    
+    # Step 3: Connections
+    year = models.CharField(max_length=50, blank=True)
+    relationship_status = models.CharField(max_length=50, blank=True)
+    
+    # Updated 'looking_for' field with more specific choices
+    looking_for = models.CharField(max_length=50, blank=True, choices=[
+        ('Friendship', 'Friendship'),
         ('Girlfriend', 'Girlfriend'),
         ('Boyfriend', 'Boyfriend'),
-        ('Friend', 'Friendship'),
-        ('BFF', 'Best friend'),
-        ('College mate', 'Study partner'),
-        ('Serious partner', 'Serious relationship'),
-        ('Hookup', 'Casual connection'),
-        ('FWB', 'Friends with benefits'),
-        ('Chill vibe', 'No expectations'),
-        ('Not sure yet', 'Still figuring it out'),
-        ('Chat', 'Interesting conversations')
-    ], blank=True, null=True)
+        ('Serious Relationship', 'Serious Relationship'),
+        ('FWB', 'FWB'),
+        ('Something Casual', 'Something Casual'),
+        ("Let's see where it goes", "Let's see where it goes"),
+    ])
 
     def __str__(self):
-        return f"Questionnaire - {self.user.username}"
+        return f"Questionnaire for {self.user.username}"
 
+
+# ProfileView Model
 class ProfileView(models.Model):
     viewer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile_views_made')
     viewed = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile_views_received')
     timestamp = models.DateTimeField(auto_now_add=True)
     
     class Meta:
-        unique_together = ('viewer', 'viewed', 'timestamp')
+        unique_together = ('viewer', 'viewed')  # Remove timestamp from unique_together
         
     def __str__(self):
         return f"{self.viewer.username} viewed {self.viewed.username}'s profile"

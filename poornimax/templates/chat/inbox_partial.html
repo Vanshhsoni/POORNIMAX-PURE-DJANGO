@@ -1,51 +1,59 @@
-{% for user in users %}
-  <div class="chat-item-wrapper" data-username="{{ user.username }}">
-    <div class="chat-item">
-      <a href="{% url 'chat:chat_with_user' user.username %}" class="chat-link">
-        <div class="profile-pic-container" style="position: relative;">
-          <img src="{{ user.profile_picture.url }}" alt="Profile" class="profile-pic">
-          <div class="profile-pic-glow"></div>
-          {% if user.has_unread %}
-            <span class="unread-dot"></span>
-          {% endif %}
+<!-- chat/templates/chat/inbox_partial.html - Simplified for debugging -->
+{% if users %}
+    {% for user in users %}
+    <div class="chat-item-wrapper" data-username="{{ user.username }}">
+        <a href="{% url 'chat:chat_with_user' user.username %}" class="chat-link">
+            <div class="chat-item">
+                <div class="profile-pic-container">
+                    {% if user.profile_picture %}
+                        <img src="{{ user.profile_picture.url }}" alt="Profile" class="profile-pic">
+                    {% else %}
+                        <div style="width: 55px; height: 55px; background: #e0e0e0; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #666;">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    {% endif %}
+                    
+                    {% if user.has_unread %}
+                        <span class="unread-dot"></span>
+                    {% endif %}
+                </div>
+                <div class="user-info">
+                    <h3>
+                        {% if user.full_name %}
+                            {{ user.full_name }}
+                        {% else %}
+                            {{ user.username }}
+                        {% endif %}
+                    </h3>
+                    <p>
+                        {% if user.questionnaire and user.questionnaire.department %}
+                            <i class="fas fa-graduation-cap"></i> {{ user.questionnaire.department }}
+                            {% if user.questionnaire.year %} • {{ user.questionnaire.year }}{% endif %}
+                        {% else %}
+                            <i class="fas fa-user"></i> {{ user.username }}
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </a>
+        <div class="chat-status">
+            <div class="menu-dots">
+                <i class="fas fa-ellipsis-v"></i>
+            </div>
+            <div class="dropdown-menu">
+                <button class="delete-btn" data-username="{{ user.username }}">
+                    <i class="fas fa-trash-alt"></i> Delete Chat
+                </button>
+            </div>
         </div>
-        <div class="user-info">
-          <h3>{{ user.full_name }}</h3>
-          <p>
-            {% if user.questionnaire %}
-              <i class="fas fa-graduation-cap"></i> {{ user.department }} • {{ user.questionnaire.year }}
-            {% else %}
-              <i class="fas fa-user"></i> {{ user.username }}
-            {% endif %}
-          </p>
-        </div>
-      </a>
-      <div class="chat-status">
-        <div class="menu-dots">
-          <i class="fas fa-ellipsis-v"></i>
-        </div>
-        <div class="dropdown-menu">
-          <button class="delete-btn" data-username="{{ user.username }}">
-            <i class="fas fa-trash-alt"></i> Delete Chat
-          </button>
-        </div>
-      </div>
     </div>
-  </div>
-{% endfor %}
-<style>
-    .unread-dot {
-  position: absolute;
-  top: 5px;       /* Adjust as needed */
-  right: 5px;     /* Adjust as needed */
-  height: 12px;
-  width: 12px;
-  background-color: #ff3b3b;  /* Bright red */
-  border-radius: 50%;
-  border: 2px solid white;    /* Optional white border */
-  box-shadow: 0 0 3px rgba(255, 0, 0, 0.5);
-  pointer-events: none;
-  z-index: 10;
-}
-
-</style>
+    {% endfor %}
+{% else %}
+    <div class="empty-state">
+        <i class="fas fa-comments"></i>
+        <p>No conversations yet</p>
+        <a href="{% url 'feed:explore' %}" class="start-chat-btn">
+            <i class="fas fa-search"></i> Find People
+        </a>
+    </div>
+{% endif %}

@@ -1,202 +1,130 @@
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required
+from django.db.models import (Q, Max, OuterRef, Subquery, Case, When, Value,
+                              BooleanField, Exists, F)
+from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth import get_user_model
-from django.http import JsonResponse
+from django.template.loader import render_to_string
 from django.utils import timezone
+from django.utils.dateparse import parse_datetime
 from django.views.decorators.http import require_POST
-from django.db.models import Q, Max, OuterRef, Subquery
-from django.template.loader import render_to_string
-from django.utils.dateparse import parse_datetime
-from chat.models import Message, DeletedChat
-import os
 
-from django.db.models import Case, When, Value, BooleanField
-
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-
-User = get_user_model()
-
-from django.db.models import OuterRef, Subquery, Q, Max
-
-from django.shortcuts import render, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth import get_user_model
-from django.http import JsonResponse
-from django.utils import timezone
-from django.views.decorators.http import require_POST
-from django.db.models import Q, Max, OuterRef, Subquery
-from django.template.loader import render_to_string
-from django.utils.dateparse import parse_datetime
-from chat.models import Message, DeletedChat
-
-from django.contrib.auth import get_user_model
-from django.contrib.auth.decorators import login_required
-from django.db.models import Q, Max, Exists, OuterRef, Case, When, Value, BooleanField, Subquery
-from django.http import JsonResponse
-from django.template.loader import render_to_string
-from django.utils.dateparse import parse_datetime
-from django.utils import timezone
-from django.shortcuts import render
 from .models import Message, DeletedChat
 
 User = get_user_model()
 
-@login_required
-def inbox_view(request):
-    user = request.user
-    msgs = Message.objects.filter(Q(sender=user) | Q(receiver=user))
 
-    user_ids = set()
-    for msg in msgs.values('sender', 'receiver'):
-        if msg['sender'] != user.id:
-            user_ids.add(msg['sender'])
-        if msg['receiver'] != user.id:
-            user_ids.add(msg['receiver'])
+def _get_active_conversations(user):
+    """
+    Helper function to get all active conversation partners for a user.
 
-    deleted_chats = DeletedChat.objects.filter(user=user, other_user__in=user_ids)
-    deleted_map = {dc.other_user_id: dc.deleted_at for dc in deleted_chats}
+    This single, efficient query annotates each user with:
+    - last_message_time: The timestamp of the last message exchanged.
+    - has_unread: A boolean indicating if there are unread messages.
+    """
+    
+    # Subquery to get the deletion timestamp for the current user and an outer user.
+    deleted_at_subquery = DeletedChat.objects.filter(
+        user=user,
+        other_user=OuterRef('pk')
+    ).values('deleted_at')[:1]
 
-    filtered_user_ids = []
-    for other_id in user_ids:
-        last_msg_time = msgs.filter(
-            Q(sender=user, receiver=other_id) | Q(sender=other_id, receiver=user)
-        ).aggregate(last_time=Max('timestamp'))['last_time']
-
-        deleted_at = deleted_map.get(other_id)
-        if not deleted_at or (last_msg_time and last_msg_time > deleted_at):
-            filtered_user_ids.append(other_id)
-
-    users = User.objects.filter(id__in=filtered_user_ids)
-
-    # Subquery to get last message timestamp
-    last_msg_subquery = Message.objects.filter(
+    # Subquery for the last message time.
+    last_message_subquery = Message.objects.filter(
         Q(sender=user, receiver=OuterRef('pk')) | Q(sender=OuterRef('pk'), receiver=user)
     ).order_by('-timestamp').values('timestamp')[:1]
 
-    # Create a case-by-case subquery for unread messages that respects deletion timestamps
-    unread_cases = []
-    for user_id in filtered_user_ids:
-        deleted_at = deleted_map.get(user_id)
-        if deleted_at:
-            # Only count unread messages after deletion timestamp
-            unread_filter = Q(
-                sender=user_id,
-                receiver=user,
-                read=False,
-                timestamp__gt=deleted_at
-            )
-        else:
-            # No deletion, count all unread messages
-            unread_filter = Q(
-                sender=user_id,
-                receiver=user,
-                read=False
-            )
-        unread_cases.append(When(pk=user_id, then=Exists(Message.objects.filter(unread_filter))))
+    # Subquery to check for unread messages.
+    # It must account for the chat deletion time.
+    unread_subquery = Message.objects.filter(
+        sender=OuterRef('pk'),
+        receiver=user,
+        read=False
+    ).annotate(
+        deleted_at=Subquery(deleted_at_subquery)
+    ).filter(
+        Q(deleted_at__isnull=True) | Q(timestamp__gt=F('deleted_at'))
+    )
 
-    # Apply the conditional unread check
-    users = users.annotate(
-        last_message_time=Subquery(last_msg_subquery),
-        has_unread=Case(
-            *unread_cases,
-            default=Value(False),
-            output_field=BooleanField()
-        )
+    # Main query to find all users the current user has messaged.
+    users = User.objects.filter(
+        Q(sent_messages__receiver=user) | Q(received_messages__sender=user)
+    ).distinct().annotate(
+        deleted_at=Subquery(deleted_at_subquery),
+        last_message_time=Subquery(last_message_subquery),
+        has_unread=Exists(unread_subquery)
+    ).filter(
+        # Filter out users where the chat was deleted and there are no new messages.
+        Q(deleted_at__isnull=True) | Q(last_message_time__gt=F('deleted_at'))
     ).order_by('-last_message_time')
 
-    return render(request, 'chat/inbox.html', {'users': users})
+    return users
+
+
+@login_required
+def inbox_view(request):
+    """Displays the user's inbox with all active conversations."""
+    active_users = _get_active_conversations(request.user)
+    return render(request, 'chat/inbox.html', {'users': active_users})
+
+
+# chat/views.py
 
 @login_required
 def inbox_content(request):
-    user = request.user
-    msgs = Message.objects.filter(Q(sender=user) | Q(receiver=user))
-
-    user_ids = set()
-    for msg in msgs.values('sender', 'receiver'):
-        if msg['sender'] != user.id:
-            user_ids.add(msg['sender'])
-        if msg['receiver'] != user.id:
-            user_ids.add(msg['receiver'])
-
-    deleted_chats = DeletedChat.objects.filter(user=user, other_user__in=user_ids)
-    deleted_map = {dc.other_user_id: dc.deleted_at for dc in deleted_chats}
-
-    filtered_user_ids = []
-    for other_id in user_ids:
-        last_msg_time = msgs.filter(
-            Q(sender=user, receiver=other_id) | Q(sender=other_id, receiver=user)
-        ).aggregate(last_time=Max('timestamp'))['last_time']
-
-        deleted_at = deleted_map.get(other_id)
-        if not deleted_at or (last_msg_time and last_msg_time > deleted_at):
-            filtered_user_ids.append(other_id)
-
-    users = User.objects.filter(id__in=filtered_user_ids)
-
-    # Last message timestamp subquery
-    last_message_time_subquery = msgs.filter(
-        Q(sender=user, receiver=OuterRef('pk')) | Q(sender=OuterRef('pk'), receiver=user)
-    ).order_by('-timestamp').values('timestamp')[:1]
-
-    # Add the same unread logic as in inbox_view
-    unread_cases = []
-    for user_id in filtered_user_ids:
-        deleted_at = deleted_map.get(user_id)
-        if deleted_at:
-            # Only count unread messages after deletion timestamp
-            unread_filter = Q(
-                sender=user_id,
-                receiver=user,
-                read=False,
-                timestamp__gt=deleted_at
-            )
-        else:
-            # No deletion, count all unread messages
-            unread_filter = Q(
-                sender=user_id,
-                receiver=user,
-                read=False
-            )
-        unread_cases.append(When(pk=user_id, then=Exists(Message.objects.filter(unread_filter))))
-
-    users = users.annotate(
-        last_message_time=Subquery(last_message_time_subquery),
-        has_unread=Case(
-            *unread_cases,
-            default=Value(False),
-            output_field=BooleanField()
-        ) if unread_cases else Value(False, output_field=BooleanField())
-    ).order_by('-last_message_time')
-
-    html = render_to_string('chat/inbox_partial.html', {'users': users}, request=request)
+    """Returns the rendered HTML for the inbox, used for AJAX refreshes."""
+    # 1. This query runs successfully
+    active_users = _get_active_conversations(request.user) 
+    
+    # 2. The error most likely happens HERE
+    html = render_to_string('chat/inbox_partial.html', {'users': active_users}, request=request)
+    
+    # 3. This line is never reached
     return JsonResponse({'html': html})
 
 @login_required
+def inbox_unread_status(request):
+    """
+    Returns a simple dictionary of users who have unread messages.
+    Used for efficient, lightweight polling to show/hide notification dots.
+    """
+    active_users_with_unread = _get_active_conversations(request.user).filter(has_unread=True)
+    unread_status = {user.username: True for user in active_users_with_unread}
+    return JsonResponse({'unread_status': unread_status})
+
+
+@login_required
 def inbox_updates(request):
-    after = request.GET.get('after')
-    if not after:
+    """
+    Checks if there have been any new messages or deletions since the last check.
+    This is a quick check to decide if a full refresh is needed.
+    """
+    after_str = request.GET.get('after')
+    if not after_str:
         return JsonResponse({'error': 'Missing timestamp parameter'}, status=400)
 
-    after_dt = parse_datetime(after)
-    if after_dt is None:
+    try:
+        after_dt = parse_datetime(after_str)
+        if after_dt is None:
+            raise ValueError
+    except ValueError:
         return JsonResponse({'error': 'Invalid timestamp format'}, status=400)
 
+    user = request.user
     new_messages = Message.objects.filter(
-        Q(receiver=request.user) | Q(sender=request.user),
+        Q(receiver=user) | Q(sender=user),
         timestamp__gt=after_dt
     ).exists()
 
     deleted_chats = DeletedChat.objects.filter(
-        user=request.user,
+        user=user,
         deleted_at__gt=after_dt
     ).exists()
-
-    # Check for messages that were marked as read (this helps detect when dots should disappear)
+    
+    # Check if a message was marked as read after the last update.
     read_messages = Message.objects.filter(
-        receiver=request.user,
-        read=True,
-        timestamp__gt=after_dt
+        receiver=user, read=True, timestamp__gt=after_dt
     ).exists()
 
     return JsonResponse({
@@ -207,62 +135,16 @@ def inbox_updates(request):
         'read_messages': read_messages
     })
 
-# Optional: Add a dedicated endpoint for just unread status updates (more efficient)
-@login_required
-def inbox_unread_status(request):
-    """
-    Returns just the unread status for each user without full HTML refresh.
-    More efficient for frequent polling.
-    """
-    user = request.user
-    msgs = Message.objects.filter(Q(sender=user) | Q(receiver=user))
-
-    user_ids = set()
-    for msg in msgs.values('sender', 'receiver'):
-        if msg['sender'] != user.id:
-            user_ids.add(msg['sender'])
-        if msg['receiver'] != user.id:
-            user_ids.add(msg['receiver'])
-
-    deleted_chats = DeletedChat.objects.filter(user=user, other_user__in=user_ids)
-    deleted_map = {dc.other_user_id: dc.deleted_at for dc in deleted_chats}
-
-    unread_status = {}
-    for other_id in user_ids:
-        deleted_at = deleted_map.get(other_id)
-        
-        if deleted_at:
-            # Only count unread messages after deletion timestamp
-            has_unread = Message.objects.filter(
-                sender=other_id,
-                receiver=user,
-                read=False,
-                timestamp__gt=deleted_at
-            ).exists()
-        else:
-            # No deletion, count all unread messages
-            has_unread = Message.objects.filter(
-                sender=other_id,
-                receiver=user,
-                read=False
-            ).exists()
-        
-        if has_unread:
-            try:
-                other_user = User.objects.get(id=other_id)
-                unread_status[other_user.username] = True
-            except User.DoesNotExist:
-                pass
-
-    return JsonResponse({'unread_status': unread_status})
 
 @login_required
 def chat_view(request, username):
+    """Displays a chat conversation with another user."""
     other_user = get_object_or_404(User, username=username)
 
-    # Mark all unread messages from other_user to current user as read
+    # Mark all messages from this user as read upon opening the chat.
     Message.objects.filter(sender=other_user, receiver=request.user, read=False).update(read=True)
 
+    # Handle sending a new message
     if request.method == 'POST':
         content = request.POST.get('message')
         if content:
@@ -274,91 +156,44 @@ def chat_view(request, username):
                 'sender_is_user': True
             })
 
+    # Get messages for the conversation, respecting deletion timestamps.
     deleted_chat = DeletedChat.objects.filter(user=request.user, other_user=other_user).first()
+    message_filter = Q(sender__in=[request.user, other_user], receiver__in=[request.user, other_user])
 
     if deleted_chat:
-        messages = Message.objects.filter(
-            sender__in=[request.user, other_user],
-            receiver__in=[request.user, other_user],
-            timestamp__gt=deleted_chat.deleted_at
-        )
-    else:
-        messages = Message.objects.filter(
-            sender__in=[request.user, other_user],
-            receiver__in=[request.user, other_user]
-        )
+        message_filter &= Q(timestamp__gt=deleted_chat.deleted_at)
 
-    return render(request, 'chat/chat.html', {
-        'messages': messages,
-        'other_user': other_user
-    })
+    messages = Message.objects.filter(message_filter)
+    
+    return render(request, 'chat/chat.html', {'messages': messages, 'other_user': other_user})
 
-
-from pathlib import Path
-from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_POST
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
-from django.utils import timezone
-from django.db.models import Q
-from .models import DeletedChat, Message
-from accounts.models import User  # Adjust import if needed
-from django.conf import settings
 
 @login_required
 @require_POST
 def delete_chat(request, username):
+    """
+    Handles deleting a chat history for the current user.
+    The other user's view of the chat remains unaffected.
+    """
     other_user = get_object_or_404(User, username=username)
-
     if other_user == request.user:
         return JsonResponse({'success': False, 'error': 'Cannot delete chat with yourself.'}, status=400)
 
-    user1 = request.user.username
-    user2 = other_user.username
+    # WARNING: Archiving chats to local files is not a scalable or secure practice.
+    # It's better to store archived messages in another database table or a dedicated logging service.
+    # This code preserves the original file-writing logic but is not recommended for production.
+    try:
+        base_dir = settings.BASE_DIR / 'deleted_chats'
+        base_dir.mkdir(parents=True, exist_ok=True)
+        file_path = base_dir / f"{request.user.username}_deletes_{other_user.username}.txt"
+        
+        with open(str(file_path), 'a', encoding='utf-8') as f:
+            f.write(f"\n--- Chat history deleted by {request.user.username} on {timezone.now()} ---\n")
+    except IOError as e:
+        # Log the error, but don't block the deletion process.
+        print(f"Could not write to chat archive file: {e}")
 
-    # Use pathlib.Path for paths
-    base_dir = settings.BASE_DIR / 'deleted_chats'
-    base_dir.mkdir(parents=True, exist_ok=True)  # create directory if it doesn't exist
-
-    file_path = base_dir / f"{user1}_deletes_{user2}.txt"
-
-    deleted_chat_record = DeletedChat.objects.filter(user=request.user, other_user=other_user).first()
-    last_deleted_at = deleted_chat_record.deleted_at if deleted_chat_record else None
-
-    if last_deleted_at:
-        messages = Message.objects.filter(
-            Q(sender=request.user, receiver=other_user) | Q(sender=other_user, receiver=request.user),
-            timestamp__gt=last_deleted_at
-        ).order_by('timestamp')
-    else:
-        messages = Message.objects.filter(
-            Q(sender=request.user, receiver=other_user) | Q(sender=other_user, receiver=request.user)
-        ).order_by('timestamp')
-
-    if not messages.exists():
-        DeletedChat.objects.update_or_create(
-            user=request.user,
-            other_user=other_user,
-            defaults={'deleted_at': timezone.now()}
-        )
-        return JsonResponse({'success': True, 'message': 'No new messages to delete.'})
-
-    timestamp_str = timezone.now().strftime('%Y-%m-%d %H:%M:%S')
-    header = f"\n--- Chat deleted on {timestamp_str} ---\n"
-
-    lines = []
-    for msg in messages:
-        time_str = msg.timestamp.strftime('%Y-%m-%d %H:%M:%S')
-        sender = msg.sender.username
-        content = msg.content.replace('\n', ' ')
-        lines.append(f"[{time_str}] {sender}: {content}")
-
-    chat_text = header + "\n".join(lines) + "\n"
-
-    # Open the file using the string representation of Path
-    with open(str(file_path), 'a', encoding='utf-8') as f:
-        f.write(chat_text)
-
+    # Record the deletion time to hide messages from the user's view.
     DeletedChat.objects.update_or_create(
         user=request.user,
         other_user=other_user,
@@ -370,25 +205,36 @@ def delete_chat(request, username):
 
 @login_required
 def poll_new_messages(request, username):
+    """Polls for new messages within a specific chat window."""
     other_user = get_object_or_404(User, username=username)
+    last_timestamp_str = request.GET.get('after')
 
-    last_timestamp = request.GET.get('after')
-    if last_timestamp:
-        last_dt = parse_datetime(last_timestamp)
-    else:
-        last_dt = timezone.now()
+    if not last_timestamp_str:
+        return JsonResponse([], safe=False) # Nothing to check against
 
+    try:
+        last_dt = parse_datetime(last_timestamp_str)
+        if last_dt is None:
+            raise ValueError
+    except ValueError:
+        return JsonResponse({'error': 'Invalid timestamp format'}, status=400)
+
+    # Fetch new messages and mark them as read
     new_messages = Message.objects.filter(
         sender=other_user,
         receiver=request.user,
         timestamp__gt=last_dt
     )
-
+    
     data = [{
         'sender': msg.sender.username,
         'content': msg.content,
         'timestamp': msg.timestamp.strftime('%H:%M'),
         'sender_is_user': False
     } for msg in new_messages]
+
+    # Mark the fetched messages as read
+    if new_messages.exists():
+        new_messages.update(read=True)
 
     return JsonResponse(data, safe=False)

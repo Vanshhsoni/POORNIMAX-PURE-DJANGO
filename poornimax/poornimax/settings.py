@@ -144,3 +144,4 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 # Add this line to ensure static files are properly collected
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
