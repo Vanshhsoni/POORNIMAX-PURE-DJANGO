@@ -272,15 +272,17 @@
                     <div class="confession-card" id="confession-{{ confession.id }}">
                         <div class="confession-content">{{ confession.content }}</div>
                         <div class="confession-meta">
-                            <div class="author-info">
-                                {% if confession.is_anonymous or not confession.user %}
-                                    <img src="{{ anonymous_avatar }}" alt="Anonymous" class="author-avatar">
-                                    <span>Anonymous</span>
-                                {% else %}
-                                    <img src="{% if confession.user.profile_picture %}{{ confession.user.profile_picture.url }}{% else %}{{ default_avatar }}{% endif %}" alt="{{ confession.user.username }}" class="author-avatar">
-                                    <span>{{ confession.user.username }}</span>
-                                {% endif %}
-                            </div>
+                            
+<div class="author-info">
+    {% if confession.is_anonymous or not confession.user %}
+        <img src="{% static 'ann.png' %}" alt="Anonymous" class="author-avatar">
+        <span>Anonymous</span>
+    {% else %}
+        <img src="{% if confession.user.profile_picture %}{{ confession.user.profile_picture.url }}{% else %}{% static 'ann.png' %}{% endif %}" alt="{{ confession.user.username }}" class="author-avatar">
+        <span>{{ confession.user.username }}</span>
+    {% endif %}
+</div>
+
                             <div class="confession-actions">
                                 <button class="action-btn {% if confession.is_liked %}liked{% endif %}" onclick="likeConfession(event, {{ confession.id }})">
                                     <i class="{% if confession.is_liked %}fas{% else %}far{% endif %} fa-heart"></i>

@@ -205,24 +205,24 @@
         
         <main class="friends-grid">
             {% if friends %}
-                {% for entry in friends %}
-                    <div class="friend-card" style="--i: {{ forloop.counter0 }};">
-                        <a href="{% url 'feed:profile' user_id=entry.user.id %}" class="card-link">
-                            <div class="avatar">
-                                <img src="{{ entry.user.profile_picture.url }}" alt="Profile of {{ entry.user.full_name }}">
-                            </div>
-                            <div class="info">
-                                <h3>{{ entry.user.full_name }}</h3>
-                                <p><i class="fas fa-graduation-cap"></i> {{ entry.user.department }} • {% if entry.user.questionnaire %}{{ entry.user.questionnaire.year }}{% else %}Student{% endif %}</p>
-                                <p><i class="fas fa-university"></i> {{ entry.user.college }}</p>
-                                <p><i class="fas fa-calendar-check"></i> Friends since {{ entry.friendship_since|date:"M d, Y" }}</p>
-                            </div>
-                        </a>
-                        <a href="{% url 'chat:chat_with_user' entry.user.username %}" class="message-btn" aria-label="Message {{ entry.user.full_name }}">
-                            <i class="fas fa-comment-dots"></i>
-                        </a>
+            {% for entry in friends %}
+            <div class="friend-card" style="--i: {{ forloop.counter0 }};">
+                <a href="{% url 'feed:profile' user_id=entry.id %}" class="card-link">
+                    <div class="avatar">
+                        <img src="{{ entry.profile_picture.url }}" alt="Profile of {{ entry.full_name }}">
                     </div>
-                {% endfor %}
+                    <div class="info">
+                        <h3>{{ entry.full_name }}</h3>
+                        <p><i class="fas fa-graduation-cap"></i> {{ entry.department }} • {% if entry.questionnaire %}{{ entry.questionnaire.year }}{% else %}Student{% endif %}</p>
+                        <p><i class="fas fa-university"></i> {{ entry.college }}</p>
+                        <p><i class="fas fa-calendar-check"></i> Friends since {{ entry.friendship_since|date:"M d, Y" }}</p>
+                    </div>
+                </a>
+                <a href="{% url 'chat:chat_with_user' entry.username %}" class="message-btn" aria-label="Message {{ entry.full_name }}">
+                    <i class="fas fa-comment-dots"></i>
+                </a>
+            </div>
+        {% endfor %}
             {% else %}
                 <div class="empty-state">
                     <i class="far fa-user-circle"></i>

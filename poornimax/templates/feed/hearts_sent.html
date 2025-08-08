@@ -258,22 +258,21 @@
         
         <div class="hearts-grid">
             {% if sent_hearts %}
-                {% for entry in sent_hearts %}
-                    <div class="user-card" style="--i: {{ forloop.counter0 }};">
-                        <a href="{% url 'feed:profile' user_id=entry.user.id %}" class="card-content">
-                            <div class="profile-pic-container">
-                                <img src="{{ entry.user.profile_picture.url }}" alt="Profile Picture of {{ entry.user.full_name }}" class="profile-pic">
-                            </div>
-                            <div class="user-info">
-                                <h3>{{ entry.user.full_name }}</h3>
-                                <p><i class="fas fa-graduation-cap"></i>{{ entry.user.department }} • {% if entry.user.questionnaire %}{{ entry.user.questionnaire.year }}{% else %}Student{% endif %}</p>
-                                <p><i class="fas fa-university"></i>{{ entry.user.college }}</p>
-                                <p class="heart-date"><i class="fas fa-clock"></i> Sent on {{ entry.sent_date|date:"M d, Y" }}</p>
-                            </div>
-                        </a>
-                        
+            {% for entry in sent_hearts %}
+            <div class="user-card" style="--i: {{ forloop.counter0 }};">
+                <a href="{% url 'feed:profile' user_id=entry.receiver.id %}" class="card-content">
+                    <div class="profile-pic-container">
+                        <img src="{{ entry.receiver.profile_picture.url }}" alt="Profile Picture of {{ entry.receiver.full_name }}" class="profile-pic">
                     </div>
-                {% endfor %}
+                    <div class="user-info">
+                        <h3>{{ entry.receiver.full_name }}</h3>
+                        <p><i class="fas fa-graduation-cap"></i>{{ entry.receiver.department }} • {% if entry.receiver.questionnaire %}{{ entry.receiver.questionnaire.year }}{% else %}Student{% endif %}</p>
+                        <p><i class="fas fa-university"></i>{{ entry.receiver.college }}</p>
+                        <p class="heart-date"><i class="fas fa-clock"></i> Sent on {{ entry.created_at|date:"M d, Y" }}</p>
+                    </div>
+                </a>
+            </div>
+        {% endfor %}
             {% else %}
                 <div class="empty-state">
                     <i class="far fa-paper-plane"></i>

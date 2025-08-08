@@ -6,8 +6,6 @@
     <title>Login | PoornimaX</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- Final Minimalist Version by Gemini --- */
-
         :root {
             --primary: #3b82f6; --primary-light: #60a5fa;
             --bg: #f8f9fa; --bg-card: #ffffff;
@@ -18,7 +16,6 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background-color: var(--bg); color: var(--text); display: grid; place-items: center; min-height: 100vh; position: relative; overflow: hidden; }
 
-        /* 1. Loader & Background */
         .loader-container { position: fixed; inset: 0; background-color: var(--bg); display: grid; place-items: center; z-index: 1000; transition: opacity 0.5s ease-out, visibility 0.5s ease-out; }
         .loader { display: flex; gap: 8px; }
         .loader div { width: 12px; height: 12px; border-radius: 50%; background-color: var(--primary); animation: pulse 1.4s ease-in-out infinite both; }
@@ -34,36 +31,31 @@
         .blob:nth-of-type(2) { width: 300px; height: 300px; bottom: -150px; right: -150px; animation-direction: alternate-reverse; }
         @keyframes drift { from { transform: rotate(0deg) scale(1) translateX(-30px); } to { transform: rotate(360deg) scale(1.2) translateX(30px); } }
 
-        /* 2. Main Content Wrapper */
         .main-content { transition: var(--transition); width: 100%; height: 100%; display: grid; place-items: center; }
         body.popup-active .main-content { filter: blur(5px); transform: scale(0.98); pointer-events: none; }
 
-        /* 3. Themed Form Container */
         .auth-container { text-align: center; padding: 30px 40px; border-radius: var(--radius); background: var(--bg-card); box-shadow: 0 8px 32px var(--shadow); border: 1px solid var(--border); width: 90%; max-width: 400px; z-index: 10; }
         h2 { background: linear-gradient(45deg, var(--primary), var(--primary-light)); background-clip: text; -webkit-background-clip: text; color: transparent; font-size: 2.2rem; margin-bottom: 25px; font-weight: 700; }
         .form-grid { margin-bottom: 20px; }
         .form-grid input { background: var(--bg); color: var(--text); border: 1px solid var(--border); padding: 14px; border-radius: 8px; font-size: 1rem; width: 100%; outline: none; transition: var(--transition); }
         .form-grid input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
-        
-        /* 4. Button Styling with Loading State */
+
         form button { background: var(--primary); color: #ffffff; padding: 14px 24px; border-radius: 8px; border: 2px solid var(--primary); font-size: 1rem; font-weight: 600; cursor: pointer; transition: var(--transition); display: flex; justify-content: center; align-items: center; gap: 8px; width: 100%; position: relative; }
         form button .btn-text, form button .arrow { transition: opacity 0.2s ease; }
         form button .arrow { display: inline-block; opacity: 1; transform: translateX(0); }
         form button:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(59, 130, 246, 0.25); }
-        
-        .btn-spinner { width: 22px; height: 22px; border: 3px solid rgba(255, 255, 255, 0.4); border-top-color: #ffffff; border-radius: 50%; animation: spin 1s linear infinite; display: none; /* Hidden by default */ }
+
+        .btn-spinner { width: 22px; height: 22px; border: 3px solid rgba(255, 255, 255, 0.4); border-top-color: #ffffff; border-radius: 50%; animation: spin 1s linear infinite; display: none; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Loading state for the button */
         form button.btn--loading { cursor: wait; pointer-events: none; }
         form button.btn--loading .btn-text, form button.btn--loading .arrow { opacity: 0; }
         form button.btn--loading .btn-spinner { display: block; position: absolute; }
-        
+
         .link-text { color: var(--text-light); font-size: 0.9rem; margin-top: 20px; }
         .link-text a { color: var(--primary); text-decoration: none; font-weight: 500; }
         .link-text a:hover { text-decoration: underline; }
 
-        /* 5. Popups & Overlays */
         .popup, .otp-popup { position: fixed; inset: 0; display: flex; justify-content: center; align-items: center; background-color: rgba(248, 249, 250, 0.5); z-index: 100; opacity: 0; visibility: hidden; transition: opacity 0.2s ease, visibility 0.2s ease; }
         .popup.active, .otp-popup.active { opacity: 1; visibility: visible; }
         .popup-box, .otp-popup form { background: var(--bg-card); padding: 30px; border-radius: var(--radius); box-shadow: 0 8px 32px var(--shadow); border: 1px solid var(--border); width: 90%; max-width: 400px; text-align: center; transform: scale(0.95); opacity: 0; transition: var(--transition); }
@@ -72,14 +64,20 @@
         .popup-box a { background: var(--primary); color: #ffffff; padding: 10px 25px; border-radius: 8px; text-decoration: none; display: inline-block; transition: var(--transition); }
         .popup-box a:hover { transform: translateY(-2px); filter: brightness(1.05); }
 
-        /* 6. 6-Box OTP Input Styling */
         .otp-popup h3 { color: var(--text); margin-bottom: 10px; font-weight: 600; }
         .otp-popup .otp-container { display: flex; justify-content: center; gap: 10px; margin: 25px 0; cursor: text; }
         .otp-box { width: 45px; height: 50px; border: 1px solid var(--border); border-radius: 8px; display: grid; place-items: center; font-size: 1.5rem; font-weight: 600; color: var(--text); transition: var(--transition); }
         .otp-box.active { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
-        .otp-input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+        .otp-input {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            direction: ltr;
+            text-align: left;
+            ime-mode: disabled;
+        }
 
-        /* 7. Footer */
         .footer { position: fixed; bottom: 0; width: 100%; background-color: rgba(255, 255, 255, 0.7); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); border-top: 1px solid var(--border); color: var(--text-light); text-align: center; padding: 15px 0; font-size: 0.9rem; font-weight: 600; letter-spacing: 3px; z-index: 5; }
     </style>
 </head>
@@ -126,7 +124,16 @@
                 <div class="otp-box"></div><div class="otp-box"></div><div class="otp-box"></div>
                 <div class="otp-box"></div><div class="otp-box"></div><div class="otp-box"></div>
             </div>
-            <input type="text" name="otp" class="otp-input" maxlength="6" pattern="\d{6}" required autocomplete="one-time-code">
+            <input 
+                type="tel" 
+                inputmode="numeric"
+                name="otp" 
+                class="otp-input" 
+                maxlength="6" 
+                pattern="\d{6}" 
+                required 
+                autocomplete="one-time-code"
+            >
             <button type="submit">
                 <span class="btn-text">Verify & Login</span>
                 <span class="arrow">&rarr;</span>
@@ -151,7 +158,6 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // --- Initial Page Loader (runs only once) ---
             const loaderContainer = document.getElementById('loaderContainer');
             if (loaderContainer.style.display !== 'none') {
                 setTimeout(() => {
@@ -162,54 +168,52 @@
                 }, 1000);
             }
 
-            // --- Button Loading Spinner on Form Submit ---
             const forms = document.querySelectorAll('.loading-form');
             forms.forEach(form => {
-                form.addEventListener('submit', (e) => {
+                form.addEventListener('submit', () => {
                     const button = form.querySelector('button[type="submit"]');
                     button.classList.add('btn--loading');
                 });
             });
 
-            // --- Background Blur Logic ---
             const body = document.body;
             const popups = document.querySelectorAll('.popup.active, .otp-popup.active');
             if (popups.length > 0) {
                 body.classList.add('popup-active');
             }
 
-            // --- 6-Box OTP Input Logic ---
             const otpContainer = document.getElementById('otpContainer');
             if (otpContainer) {
                 const otpInput = otpContainer.nextElementSibling;
                 const otpBoxes = [...otpContainer.children];
 
                 const handleOtpInput = (e) => {
-                    const value = e.target.value;
+                    const value = e.target.value.replace(/\D/g, ''); // only digits
+                    e.target.value = value; // keep clean
+
                     otpBoxes.forEach((box, index) => {
                         box.textContent = value[index] || "";
-                        otpBoxes.forEach(b => b.classList.remove('active'));
-                        if (value.length < 6) {
-                            otpBoxes[value.length]?.classList.add('active');
-                        }
                     });
-                };
-                
-                const handleOtpKeydown = (e) => {
-                    if (e.key === "Backspace" && otpInput.value.length > 0) {
-                        otpBoxes.forEach(b => b.classList.remove('active'));
-                        otpBoxes[otpInput.value.length - 1].classList.add('active');
+
+                    otpBoxes.forEach(box => box.classList.remove('active'));
+                    if (value.length < 6) {
+                        otpBoxes[value.length]?.classList.add('active');
                     }
                 };
-
+                
                 otpContainer.addEventListener('click', () => otpInput.focus());
                 otpInput.addEventListener('input', handleOtpInput);
-                otpInput.addEventListener('keydown', handleOtpKeydown);
+                
                 otpInput.addEventListener('focus', () => {
-                    otpBoxes.forEach(b => b.classList.remove('active'));
-                    otpBoxes[otpInput.value.length]?.classList.add('active');
+                    otpBoxes.forEach(box => box.classList.remove('active'));
+                    if (otpInput.value.length < 6) {
+                        otpBoxes[otpInput.value.length]?.classList.add('active');
+                    }
                 });
-                otpInput.addEventListener('blur', () => otpBoxes.forEach(box => box.classList.remove('active')));
+                
+                otpInput.addEventListener('blur', () => {
+                    otpBoxes.forEach(box => box.classList.remove('active'));
+                });
             }
         });
     </script>

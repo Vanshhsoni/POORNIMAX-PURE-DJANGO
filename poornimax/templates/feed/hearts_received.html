@@ -317,19 +317,19 @@
         
         <div class="hearts-grid">
             {% if received_hearts %}
-                {% for entry in received_hearts %}
-                    <a href="{% url 'feed:profile' user_id=entry.user.id %}" class="user-card">
-                        <div class="profile-pic-container">
-                            <img src="{{ entry.user.profile_picture.url }}" alt="Profile Picture of {{ entry.user.full_name }}" class="profile-pic">
-                        </div>
-                        <div class="user-info">
-                            <h3>{{ entry.user.full_name }}</h3>
-                            <p><i class="fas fa-graduation-cap"></i>{{ entry.user.department }} • {% if entry.user.questionnaire %}{{ entry.user.questionnaire.year }}{% else %}Student{% endif %}</p>
-                            <p><i class="fas fa-university"></i>{{ entry.user.college }}</p>
-                            <p class="heart-date"><i class="fas fa-clock"></i> Received on {{ entry.received_date|date:"M d, Y" }}</p>
-                        </div>
-                    </a>
-                {% endfor %}
+            {% for entry in received_hearts %}
+            <a href="{% url 'feed:profile' user_id=entry.sender.id %}" class="user-card">
+                <div class="profile-pic-container">
+                    <img src="{{ entry.sender.profile_picture.url }}" alt="Profile Picture of {{ entry.sender.full_name }}" class="profile-pic">
+                </div>
+                <div class="user-info">
+                    <h3>{{ entry.sender.full_name }}</h3>
+                    <p><i class="fas fa-graduation-cap"></i>{{ entry.sender.department }} • {% if entry.sender.questionnaire %}{{ entry.sender.questionnaire.year }}{% else %}Student{% endif %}</p>
+                    <p><i class="fas fa-university"></i>{{ entry.sender.college }}</p>
+                    <p class="heart-date"><i class="fas fa-clock"></i> Received on {{ entry.created_at|date:"M d, Y" }}</p>
+                </div>
+            </a>
+        {% endfor %}
             {% else %}
                 <div class="empty-state">
                     <i class="far fa-heart"></i>
