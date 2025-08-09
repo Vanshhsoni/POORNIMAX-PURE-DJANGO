@@ -167,33 +167,56 @@ def chat_view(request, username):
     
     return render(request, 'chat/chat.html', {'messages': messages, 'other_user': other_user})
 
+from pathlib import Path
+from django.conf import settings
+from django.utils import timezone
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required
+from .models import Message, DeletedChat
+from django.contrib.auth import get_user_model
 
+User = get_user_model()
 @login_required
 @require_POST
 def delete_chat(request, username):
-    """
-    Handles deleting a chat history for the current user.
-    The other user's view of the chat remains unaffected.
-    """
     other_user = get_object_or_404(User, username=username)
     if other_user == request.user:
         return JsonResponse({'success': False, 'error': 'Cannot delete chat with yourself.'}, status=400)
 
-    # WARNING: Archiving chats to local files is not a scalable or secure practice.
-    # It's better to store archived messages in another database table or a dedicated logging service.
-    # This code preserves the original file-writing logic but is not recommended for production.
+    # Get last deletion time for this chat
+    last_deletion = DeletedChat.objects.filter(
+        user=request.user,
+        other_user=other_user
+    ).values_list('deleted_at', flat=True).first()
+
+    # Only grab messages after the last deletion
+    message_filter = {
+        'sender__in': [request.user, other_user],
+        'receiver__in': [request.user, other_user],
+    }
+    if last_deletion:
+        message_filter['timestamp__gt'] = last_deletion
+
+    messages = Message.objects.filter(**message_filter).order_by('timestamp')
+
     try:
-        base_dir = settings.BASE_DIR / 'deleted_chats'
+        base_dir = Path(settings.BASE_DIR) / 'deleted_chats'
         base_dir.mkdir(parents=True, exist_ok=True)
         file_path = base_dir / f"{request.user.username}_deletes_{other_user.username}.txt"
-        
+
         with open(str(file_path), 'a', encoding='utf-8') as f:
             f.write(f"\n--- Chat history deleted by {request.user.username} on {timezone.now()} ---\n")
-    except IOError as e:
-        # Log the error, but don't block the deletion process.
-        print(f"Could not write to chat archive file: {e}")
+            for msg in messages:
+                f.write(f"[{msg.timestamp}] {msg.sender.username} → {msg.receiver.username}: {msg.content}\n")
+            f.write("\n")
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'success': False, 'error': f'Could not archive chat: {e}'}, status=500)
 
-    # Record the deletion time to hide messages from the user's view.
+    # Update deletion timestamp so next delete only gets new messages
     DeletedChat.objects.update_or_create(
         user=request.user,
         other_user=other_user,

@@ -608,17 +608,34 @@ def get_confession_details_api(request, confession_id):
     comments = confession.comments.select_related('user').order_by('created_at')
     comment_list = []
     for comment in comments:
+        # Get the correct profile picture URL for each comment
+        if comment.is_anonymous or not comment.user:
+            profile_pic = ANONYMOUS_AVATAR_URL
+        else:
+            profile_pic = comment.user.profile_picture.url if comment.user.profile_picture else DEFAULT_AVATAR_URL
+
         comment_list.append({
-            'user': "Anonymous" if comment.is_anonymous else comment.user.username,
-            'profile_picture_url': ANONYMOUS_AVATAR_URL if comment.is_anonymous else (comment.user.profile_picture.url if comment.user.profile_picture else DEFAULT_AVATAR_URL),
+            'user': "Anonymous" if comment.is_anonymous or not comment.user else comment.user.username,
+            'profile_picture_url': profile_pic,
             'content': comment.content,
             'time_since': timesince(comment.created_at) + " ago",
         })
         
     author_name = "Anonymous" if confession.is_anonymous or not confession.user else confession.user.username
+    
+    # NEW: Get the correct profile picture URL for the confession's author
+    if confession.is_anonymous or not confession.user:
+        author_avatar_url = ANONYMOUS_AVATAR_URL
+    else:
+        author_avatar_url = confession.user.profile_picture.url if confession.user.profile_picture else DEFAULT_AVATAR_URL
+
     return JsonResponse({
         'success': True,
-        'confession': {'content': confession.content, 'author': author_name},
+        'confession': {
+            'content': confession.content,
+            'author': author_name,
+            'author_avatar': author_avatar_url  # This is the new key
+        },
         'comments': comment_list
     })
 

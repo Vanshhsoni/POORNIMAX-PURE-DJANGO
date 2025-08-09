@@ -207,19 +207,23 @@
         .footer { text-align: center; padding: 20px; font-size: 0.9rem; color: var(--text-light); font-weight: 600; letter-spacing: 3px; }
 
         /* 7. MOBILE NAVIGATION */
+        /* Bottom Nav */
         nav {
             position: fixed; bottom: 0; left: 0; width: 100%;
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-            display: flex; justify-content: space-around;
-            padding: 10px 0; border-top: 1px solid var(--border); z-index: 100;
+            background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            display: flex; justify-content: space-around; padding: 0.5rem 0;
+            border-top: 1px solid var(--border-color); z-index: 1000;
         }
-        nav a { color: var(--text-light); padding: 8px 16px; transition: var(--transition); font-size: 1.5rem; position: relative; }
-        nav a:hover, nav a.active-link { color: var(--primary); transform: translateY(-5px); }
-        nav a.active-link::after {
-            content: ''; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%);
-            width: 6px; height: 6px; background: var(--primary); border-radius: 50%;
+        nav a { 
+            display: flex; flex-direction: column; align-items: center; color: var(--text-light);
+            padding: 0.5rem 1rem; transition: var(--transition);
         }
+        nav a i { font-size: 1.5rem; margin-bottom: 2px; }
+        nav a span { font-size: 0.65rem; font-weight: 500; }
+        nav a.active-link { color: var(--primary); }
+        nav a:active { transform: scale(0.95); }
+
+        
         
         /* 8. RESPONSIVE DESIGN */
         @media (max-width: 768px) {
@@ -287,10 +291,9 @@
     <nav>
         <a href="{% url 'feed:home' %}"><i class="fas fa-home"></i></a>
         <a href="{% url 'feed:explore' %}"><i class="fas fa-compass"></i></a>
-        <a href="{% url 'feed:hearts_sent' %}" class="active-link"><i class="fas fa-paper-plane"></i></a>
-        <a href="{% url 'feed:friends_list' %}"><i class="fas fa-heart"></i></a>
-        <a href="{% url 'chat:inbox' %}"><i class="fas fa-comment-dots"></i></a>
-        <a href="{% url 'feed:profile' user_id=user.id %}"><i class="fas fa-user"></i></a>
+        <a href="{% url 'feed:create_post' %}"><i class="fas fa-plus-circle"></i></a>
+        <a href="{% url 'feed:friends_list' %}" class="active-link"><i class="fas fa-user-friends"></i></a>
+        <a href="{% url 'chat:inbox' %}" ><i class="fas fa-comment"></i></a>
     </nav>
  
     <script>

@@ -154,22 +154,14 @@
         .empty-state p { color: var(--text-light); max-width: 350px; margin: 0 auto; line-height: 1.6; }
         .footer { text-align: center; padding: 30px 20px 20px; font-size: 0.9rem; color: var(--text-light); font-weight: 600; letter-spacing: 3px; }
 
-        /* 5. MOBILE NAVIGATION */
-        nav {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            background: hsla(0, 0%, 100%, 0.8);
-            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-            display: flex; justify-content: space-around;
-            padding: 10px 0; border-top: 1px solid var(--border); z-index: 100;
-        }
-        nav a { color: var(--text-light); padding: 8px; font-size: 1.5rem; position: relative; transition: var(--transition); }
-        nav a:hover, nav a.active-link { color: var(--primary); transform: translateY(-5px); }
-        nav a.active-link::after {
-            content: ''; position: absolute; bottom: -8px; left: 50%;
-            transform: translateX(-50%); width: 6px; height: 6px;
-            background: var(--primary); border-radius: 50%;
-        }
-        
+        /* Bottom Navigation */
+        nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; justify-content: space-around; box-shadow: 0 -2px 15px var(--shadow); z-index: 100; }
+        nav a { color: var(--text-light); padding: 15px; transition: var(--transition); position: relative; }
+        nav a i { font-size: 22px; transition: var(--transition); }
+        nav a:hover { color: var(--text); }
+        nav a.active-link { color: var(--primary); }
+        nav a.active-link::after { content: ''; position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 24px; height: 4px; background: var(--primary); border-radius: 2px; }
+
         /* 6. RESPONSIVE DESIGN */
         @media (max-width: 768px) {
             .content-wrapper { padding: 15px; }
@@ -233,13 +225,13 @@
         </main>
     </div>
  
-    <nav>
-        <a href="{% url 'feed:home' %}"><i class="fas fa-home"></i></a>
-        <a href="{% url 'feed:explore' %}"><i class="fas fa-compass"></i></a>
-        <a href="{% url 'feed:friends_list' %}" class="active-link"><i class="fas fa-user-friends"></i></a>
-        <a href="{% url 'chat:inbox' %}"><i class="fas fa-comment-dots"></i></a>
-        <a href="{% url 'feed:profile' user_id=user.id %}"><i class="fas fa-user"></i></a>
-    </nav>
+<nav>
+    <a href="{% url 'feed:home' %}"><i class="fas fa-home"></i></a>
+    <a href="{% url 'feed:explore' %}"><i class="fas fa-compass"></i></a>
+    <a href="{% url 'feed:create_post' %}"><i class="fas fa-plus-circle"></i></a>
+    <a href="{% url 'feed:friends_list' %}" class="active-link"><i class="fas fa-user-friends"></i></a>
+    <a href="{% url 'chat:inbox' %}" ><i class="fas fa-comment"></i></a>
+</nav>
  
     <script>
         document.addEventListener('DOMContentLoaded', () => {

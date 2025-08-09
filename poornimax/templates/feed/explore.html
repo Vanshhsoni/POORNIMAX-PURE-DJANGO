@@ -301,7 +301,6 @@
             </div>
         </section>
     </div>
-
     <div id="commentPopup" class="popup-overlay">
         <div class="popup">
             <header class="popup-header">
@@ -309,14 +308,30 @@
                 <button onclick="closeCommentPopup()" class="close-btn">&times;</button>
             </header>
             <div class="popup-body">
-                <div id="popupConfessionContent">
+                <div id="popupConfessionContent" class="popup-confession-content">
+                    <div class="author-details">
+                        <img id="popupConfessionAuthorAvatar" src="{% static 'ann.png' %}" alt="Author" class="author-avatar-popup">
+                        <span id="popupConfessionAuthorName" class="author-name-popup"></span>
                     </div>
+                    <blockquote id="popupConfessionQuote" class="confession-quote">
+                    </blockquote>
+                </div>
+    
                 <div id="commentList" class="comment-list">
+                    <div class="comment-item">
+                        <img src="{% static 'ann.png' %}" alt="User" class="comment-avatar">
+                        <div class="comment-body">
+                            <div>
+                                <span class="user">Anonymous</span>
+                                <span class="time">Just now</span>
+                            </div>
+                            <p class="content">This is a placeholder comment.</p>
+                        </div>
                     </div>
+                </div>
             </div>
             <footer class="popup-footer">
                 <form id="commentForm" onsubmit="submitComment(event)">
-                    {% csrf_token %}
                     <textarea id="commentInput" name="content" placeholder="Write a thoughtful comment..." required></textarea>
                     <div class="form-actions">
                         <label class="anonymous-check">

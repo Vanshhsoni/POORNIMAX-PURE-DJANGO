@@ -336,62 +336,13 @@
       margin: 0 auto;
     }
 
-    /* Bottom Navigation */
-    nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
-      display: flex;
-      justify-content: space-around;
-      padding: 12px 0;
-      box-shadow: 0 -3px 15px var(--shadow);
-      z-index: 100;
-    }
-
-    nav a {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      color: var(--text-light);
-      padding: 8px 16px;
-      position: relative;
-      transition: var(--transition);
-    }
-
-    nav a i {
-      transition: var(--transition);
-      opacity: 0.7;
-      font-size: 24px;
-    }
-
-    nav a:hover i {
-      transform: translateY(-5px);
-      opacity: 1;
-    }
-
-    nav a.active-link {
-      color: var(--primary);
-    }
-
-    nav a.active-link i {
-      opacity: 1;
-      color: var(--primary);
-    }
-
-    nav a.active-link::after {
-      content: '';
-      position: absolute;
-      bottom: -12px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 40px;
-      height: 4px;
-      background: linear-gradient(90deg, var(--primary), var(--primary-light));
-      border-radius: 4px;
-    }
+            /* Bottom Navigation */
+            nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; justify-content: space-around; box-shadow: 0 -2px 15px var(--shadow); z-index: 100; }
+            nav a { color: var(--text-light); padding: 15px; transition: var(--transition); position: relative; }
+            nav a i { font-size: 22px; transition: var(--transition); }
+            nav a:hover { color: var(--text); }
+            nav a.active-link { color: var(--primary); }
+            nav a.active-link::after { content: ''; position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 24px; height: 4px; background: var(--primary); border-radius: 2px; }
 
     /* Responsive Design */
     @media (max-width: 768px) {
@@ -472,22 +423,12 @@
   
     <!-- Bottom Navigation Bar -->
     <nav>
-      <a href="{% url 'feed:home' %}">
-        <i class="fas fa-home"></i>
-      </a>
-      <a href="{% url 'feed:explore' %}">
-        <i class="fas fa-compass"></i>
-      </a>
-      <a href="{% url 'feed:create_post' %}">
-        <i class="fas fa-plus-circle"></i>
-      </a>
-      <a href="{% url 'feed:friends_list' %}">
-        <i class="fas fa-user-friends"></i>
-      </a>
-      <a href="{% url 'chat:inbox' %}">
-        <i class="fas fa-comment"></i>
-      </a>
-    </nav>
+      <a href="{% url 'feed:home' %}"><i class="fas fa-home"></i></a>
+      <a href="{% url 'feed:explore' %}"><i class="fas fa-compass"></i></a>
+      <a href="{% url 'feed:create_post' %}"><i class="fas fa-plus-circle"></i></a>
+      <a href="{% url 'feed:friends_list' %}" class="active-link"><i class="fas fa-user-friends"></i></a>
+      <a href="{% url 'chat:inbox' %}" ><i class="fas fa-comment"></i></a>
+  </nav>
   
     <script>
       // Initialize particles.js

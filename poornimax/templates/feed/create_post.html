@@ -2,232 +2,409 @@
 {% load static %}
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Create Post | PoornimaX</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
-  <script src="https://kit.fontawesome.com/b8b432d7d3.js" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
-  <style>
-    /* --- Your existing styles --- */
-    :root {
-      --primary: #6c63ff;
-      --primary-light: #8f88ff;
-      --primary-dark: #5046e5;
-      --secondary: #ff6584;
-      --bg: #f8f9fa;
-      --text: #333;
-      --text-light: #777;
-      --card-bg: #fff;
-      --shadow: rgba(0, 0, 0, 0.1);
-      --border: #e0e0e0;
-      --radius: 12px;
-      --transition: all 0.3s ease;
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-    body { background-color: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 70px; }
-    a { text-decoration: none; color: inherit; }
-    button { cursor: pointer; border: none; outline: none; font-size: 14px; font-weight: 500; }
-    .container { max-width: 800px; margin: 30px auto; padding: 0 15px; }
-    #particles-js { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.2; }
-    .create-post-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: var(--radius); box-shadow: 0 8px 20px var(--shadow); overflow: hidden; animation: fadeInUp 0.5s ease; }
-    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    .create-post-header { background: linear-gradient(120deg, var(--primary), var(--primary-dark)); padding: 20px; position: relative; color: white; text-align: center; animation: gradientFlow 10s ease infinite; background-size: 200% 200%; }
-    @keyframes gradientFlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-    .create-post-header h2 { font-size: 24px; font-weight: 600; }
-    .back-button { position: absolute; top: 20px; left: 20px; width: 36px; height: 36px; background: rgba(255, 255, 255, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; transition: var(--transition); }
-    .back-button:hover { background: rgba(255, 255, 255, 0.4); transform: scale(1.1); }
-    .create-post-body { padding: 25px; }
-    .form-group { margin-bottom: 25px; }
-    .form-group label { display: block; font-weight: 600; margin-bottom: 12px; color: var(--text); font-size: 16px; }
-    input[type="file"] { width: 100%; padding: 12px; background-color: rgba(108, 99, 255, 0.03); border: 1px dashed var(--primary-light); border-radius: var(--radius); cursor: pointer; transition: var(--transition); }
-    input[type="file"]:hover { background-color: rgba(108, 99, 255, 0.06); }
-    .preview-container { margin-top: 15px; text-align: center; background-color: rgba(108, 99, 255, 0.03); border-radius: var(--radius); padding: 15px; border: 1px dashed var(--primary-light); display: none; animation: fadeIn 0.5s ease; }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    .preview-image { max-width: 100%; max-height: 300px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
-    textarea { width: 100%; padding: 15px; border: 1px solid rgba(0, 0, 0, 0.1); border-radius: var(--radius); font-size: 15px; min-height: 120px; transition: var(--transition); resize: vertical; }
-    textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.2); }
-    .btn-post { background: linear-gradient(to right, var(--primary), var(--primary-dark)); color: white; padding: 14px 20px; width: 100%; border-radius: 30px; font-weight: 600; font-size: 16px; transition: var(--transition); box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3); position: relative; overflow: hidden; }
-    .btn-post:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(108, 99, 255, 0.4); }
-    .btn-post::after { content: ""; position: absolute; width: 120%; height: 120%; background: rgba(255, 255, 255, 0.2); top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); border-radius: 50%; transition: transform 0.4s ease; }
-    .btn-post:active::after { transform: translate(-50%, -50%) scale(1); }
-    .upload-icon { font-size: 44px; color: var(--primary-light); margin-bottom: 15px; }
-    .upload-text { display: block; margin-top: 10px; color: var(--text-light); font-size: 14px; }
-    nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 12px 0; box-shadow: 0 -2px 10px var(--shadow); z-index: 100; }
-    nav a { display: flex; flex-direction: column; align-items: center; color: var(--text-light); padding: 8px 16px; position: relative; }
-    nav a i { font-size: 20px; margin-bottom: 3px; transition: var(--transition); }
-    nav a.active-link { color: var(--primary); }
-    nav a:hover i { transform: translateY(-3px); }
-    
-    /* --- Styles for Loader --- */
-    .loader-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #f9f9f9; display: flex; justify-content: center; align-items: center; z-index: 9999; opacity: 1; visibility: visible; transition: opacity 0.6s ease-in-out, visibility 0.6s ease-in-out; }
-    .loader { width: 80px; height: 40px; display: flex; }
-    .loader:before, .loader:after { content: ""; margin: 0 -2px 0 0; flex: 1; --c: no-repeat linear-gradient(#046D8B 0 0); background: var(--c), var(--c), var(--c), var(--c); animation: l13-1 1s infinite linear, l13-2 1s infinite linear; }
-    .loader:after { transform: scale(-1); margin: 0 0 0 -2px; }
-    @keyframes l13-1 { 0%, 3% {background-size: 0 4px, 4px 0, 0 4px, 4px 0;} 12.5% {background-size: 50% 4px, 4px 0, 0 4px, 4px 0;} 25% {background-size: 50% 4px, 4px 50%, 0 4px, 4px 0;} 37.5% {background-size: 50% 4px, 4px 50%, 50% 4px, 4px 0;} 46%, 54% {background-size: 50% 4px, 4px 50%, 50% 4px, 4px 50%;} 62.5% {background-size: 0 4px, 4px 50%, 50% 4px, 4px 50%;} 75% {background-size: 0 4px, 4px 0, 50% 4px, 4px 50%;} 87.5% {background-size: 0 4px, 4px 0, 0 4px, 4px 50%;} 96%,100% {background-size: 0 4px, 4px 0, 0 4px, 4px 0;} }
-    @keyframes l13-2 { 0%,49.9% {background-position: 0 20px, 50% 20px, 20px 100%, 100% 100%;} 50%,100% {background-position: right 20px top 20px, 50% 100%, 100% 100%, 100% 20px;} }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Post | PoornimaX</title>
+    <script src="https://kit.fontawesome.com/b8b432d7d3.js" crossorigin="anonymous"></script>
+    <style>
+        /* --- CORE THEME FROM LANDING PAGE --- */
+        :root {
+            --primary: #3b82f6;      
+            --primary-light: #60a5fa;
+            --bg: #f8f9fa;            
+            --bg-card: #ffffff;      
+            --text: #1f2937;          
+            --text-light: #6c757d;   
+            --border: #e9ecef;        
+            --shadow: rgba(0, 0, 0, 0.08); 
+            --radius: 12px;           
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
 
-    /* --- ✨ NEW STYLES FOR VISIBILITY TOGGLE --- */
-    .visibility-toggle-group {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        background-color: #f8f9fa;
-        padding: 15px;
-        border-radius: var(--radius);
-        margin-bottom: 25px;
-        border: 1px solid var(--border);
-    }
-    .toggle-label {
-        font-weight: 500;
-        color: var(--text);
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-    .toggle-switch {
-        position: relative;
-        display: inline-block;
-        width: 50px;
-        height: 28px;
-    }
-    .toggle-switch input {
-        opacity: 0;
-        width: 0;
-        height: 0;
-    }
-    .slider {
-        position: absolute;
-        cursor: pointer;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: #ccc;
-        transition: .4s;
-        border-radius: 28px;
-    }
-    .slider:before {
-        position: absolute;
-        content: "";
-        height: 20px;
-        width: 20px;
-        left: 4px;
-        bottom: 4px;
-        background-color: white;
-        transition: .4s;
-        border-radius: 50%;
-    }
-    input:checked + .slider {
-        background-color: var(--primary);
-    }
-    input:checked + .slider:before {
-        transform: translateX(22px);
-    }
-    /* --- END OF NEW STYLES --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  </style>
+        html {
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding-bottom: 80px; /* Ensure space for the nav bar */
+            position: relative;
+            overflow-x: hidden; /* Prevent horizontal scroll from blobs */
+        }
+        
+        a { text-decoration: none; color: inherit; }
+
+        /* --- UPDATED: Loader from Landing Page --- */
+        .loader-container {
+            position: fixed;
+            inset: 0;
+            background-color: var(--bg);
+            display: grid;
+            place-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+        }
+
+        .loader {
+            display: flex;
+            gap: 8px;
+        }
+
+        .loader div {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            animation: pulse 1.4s ease-in-out infinite both;
+        }
+
+        .loader div:nth-child(1) { animation-delay: -0.32s; }
+        .loader div:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes pulse {
+            0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
+            40% { transform: scale(1.0); opacity: 1; }
+        }
+        
+        /* --- NEW: Animated Blob Background from Landing Page --- */
+        .background-blobs {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            background: #aed6f1;
+            opacity: 0.5;
+            filter: blur(80px);
+            animation: drift 30s infinite linear alternate;
+        }
+
+        .blob.purple { background: #d5bcf0; animation-duration: 40s; }
+        .blob:nth-of-type(1) { width: 450px; height: 450px; top: -150px; left: -200px; }
+        .blob:nth-of-type(2) { width: 350px; height: 350px; bottom: -150px; right: -150px; animation-direction: alternate-reverse; }
+
+        @keyframes drift {
+            from { transform: rotate(0deg) translateX(-20px) translateY(20px) rotate(0deg); }
+            to { transform: rotate(360deg) translateX(50px) translateY(-50px) rotate(-360deg); }
+        }
+
+        /* Main container for the form */
+        .container { 
+            max-width: 600px; 
+            margin: 30px auto; 
+            padding: 0 15px; 
+        }
+
+        /* --- UPDATED: Card Styling to match Landing Page --- */
+        .create-post-card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: 0 8px 32px var(--shadow);
+            overflow: hidden;
+            transition: var(--transition);
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .create-post-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        @keyframes fadeInUp { 
+            from { opacity: 0; transform: translateY(20px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+
+        /* Header within the card */
+        .create-post-header {
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+        .create-post-header h2 { font-size: 20px; font-weight: 600; text-align: center; flex-grow: 1; }
+        .back-button {
+            font-size: 20px;
+            color: var(--text-light);
+            transition: var(--transition);
+        }
+        .back-button:hover { color: var(--primary); transform: translateX(-3px); }
+
+        /* Form Body */
+        .create-post-body { padding: 25px; }
+        .form-group { margin-bottom: 25px; }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text);
+            font-size: 16px;
+        }
+
+        /* Upload Area Styles (Themed) */
+        #upload-area {
+            background-color: #fcfdff;
+            border: 2px dashed var(--primary-light);
+            border-radius: var(--radius);
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        #upload-area:hover {
+            background-color: #f7fafe;
+            border-color: var(--primary);
+        }
+        .upload-icon { font-size: 40px; color: var(--primary); margin-bottom: 15px; }
+        .upload-area-text { font-weight: 500; color: var(--primary); font-size: 16px; margin-bottom: 5px; }
+        .upload-area-subtext { color: var(--text-light); font-size: 13px; }
+
+        /* Preview Container Styles (Themed) */
+        #preview-container { display: none; text-align: center; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .preview-image {
+            width: 100%;
+            max-height: 400px;
+            object-fit: cover;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            margin-bottom: 15px;
+        }
+        .btn-change-photo {
+            background-color: var(--bg-card);
+            color: var(--primary);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .btn-change-photo:hover { background-color: #f1f5f9; border-color: var(--primary); }
+        
+        /* Text Area (Themed) */
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 15px;
+            min-height: 100px;
+            transition: var(--transition);
+            resize: vertical;
+            background-color: var(--bg);
+        }
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+            background-color: var(--bg-card);
+        }
+        textarea::placeholder { color: var(--text-light); }
+
+        /* Visibility Toggle (Themed) */
+        .visibility-toggle-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: var(--bg);
+            padding: 15px;
+            border-radius: var(--radius);
+        }
+        .toggle-label { font-weight: 500; color: var(--text); display: flex; align-items: center; gap: 12px; }
+        .toggle-label i { color: var(--primary); }
+        .toggle-switch { position: relative; display: inline-block; width: 50px; height: 28px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; inset: 0; background-color: #ccc; transition: .4s; border-radius: 28px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(22px); }
+
+        /* --- UPDATED: Post Button to match Landing Page .btn style --- */
+        .btn-post {
+            background: var(--primary);
+            color: #ffffff;
+            padding: 14px 24px;
+            width: 100%;
+            border-radius: var(--radius);
+            border: 2px solid var(--primary);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px; /* Space between icon and text */
+        }
+        .btn-post .arrow {
+            display: inline-block;
+            opacity: 0;
+            transform: translateX(-8px);
+            transition: var(--transition);
+        }
+        .btn-post:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.25);
+        }
+        .btn-post:hover .arrow {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* --- NO CHANGES TO NAV BAR AS REQUESTED --- */
+        nav {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: rgba(255, 255, 255, 0.85); 
+            backdrop-filter: blur(10px); 
+            -webkit-backdrop-filter: blur(10px);
+            display: flex; justify-content: space-around; padding: 0.5rem 0;
+            border-top: 1px solid var(--border); z-index: 1000;
+        }
+        nav a { 
+            display: flex; flex-direction: column; align-items: center; 
+            color: var(--text-light); padding: 0.5rem 1rem; 
+            transition: var(--transition); 
+        }
+        nav a i { font-size: 1.5rem; margin-bottom: 2px; }
+        nav a span { font-size: 0.65rem; font-weight: 500; }
+        /* Active link now uses the new theme color */
+        nav a.active-link { color: var(--primary); } 
+        nav a:active { transform: scale(0.95); }
+
+    </style>
 </head>
 
 <body>
-  <div class="loader-container">
-    <div class="loader"></div>
-  </div>
-  
-  <div id="particles-js"></div>
-  
-  <div class="container">
-    <div class="create-post-card">
-      <div class="create-post-header">
-        <a href="{% url 'feed:home' %}" class="back-button"><i class="fas fa-arrow-left"></i></a>
-        <h2>Create Post</h2>
-      </div>
-
-      <div class="create-post-body">
-        <form method="POST" enctype="multipart/form-data">
-          {% csrf_token %}
-
-          <div class="form-group">
-            <label for="id_image">1. Upload Photo</label>
-            <div id="upload-area" style="text-align: center; cursor: pointer;">
-              <i class="fas fa-cloud-upload-alt upload-icon"></i>
-              <div>
-                <input type="file" id="id_image" name="image" required style="display: none;">
-                <button type="button" class="btn-post" style="margin-bottom: 10px; background: white; color: var(--primary); border: 1px solid var(--primary);">Choose Image</button>
-              </div>
-              <span class="upload-text">JPG, PNG, or GIF • Max 10MB</span>
-            </div>
-            <div id="preview-container" class="preview-container">
-              <img id="preview" class="preview-image" />
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="id_caption">2. Write a Caption (Optional)</label>
-            <textarea id="id_caption" name="caption" placeholder="What's on your mind?"></textarea>
-          </div>
-
-          <div class="form-group">
-            <label>3. Set Visibility</label>
-            <div class="visibility-toggle-group">
-              <label for="id_is_public" class="toggle-label">
-                <i class="fas fa-globe-americas"></i>
-                <span>Make this post public</span>
-              </label>
-              <div class="toggle-switch">
-                <input type="checkbox" id="id_is_public" name="is_public">
-                <label for="id_is_public" class="slider"></label>
-            </div>
-            </div>
-          </div>
-          <button type="submit" class="btn-post">
-            <i class="fas fa-paper-plane" style="margin-right: 8px;"></i> Share Post
-          </button>
-        </form>
-      </div>
+    <div class="loader-container" id="loaderContainer">
+        <div class="loader">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
     </div>
-  </div>
-
-  <nav>
-    <a href="{% url 'feed:home' %}"><i class="fas fa-home"></i></a>
-    <a href="{% url 'feed:explore' %}"><i class="fas fa-compass"></i></a>
-    <a href="{% url 'feed:create_post' %}" class="active-link"><i class="fas fa-plus-circle"></i></a>
-    <a href="{% url 'feed:friends_list' %}"><i class="fas fa-user-friends"></i></a>
-    <a href="{% url 'chat:inbox' %}"><i class="fas fa-comment"></i></a>
-  </nav>
-
-  <script>
-    // --- Your existing JavaScript for loader, particles, and image preview ---
-    window.addEventListener("load", () => {
-      setTimeout(() => {
-        const loader = document.querySelector(".loader-container");
-        if (loader) {
-          loader.style.opacity = "0";
-          loader.style.visibility = "hidden";
-          loader.style.pointerEvents = "none";
-        }
-      }, 1000); // 1 second
-    });
     
-    particlesJS('particles-js', { /* ... your particles config ... */ });
-    
-    document.getElementById('id_image').addEventListener('change', function(e) {
-      const previewContainer = document.getElementById('preview-container');
-      const preview = document.getElementById('preview');
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          preview.src = e.target.result;
-          previewContainer.style.display = 'block';
-        }
-        reader.readAsDataURL(file);
-      }
-    });
+    <div class="background-blobs">
+        <div class="blob blue"></div>
+        <div class="blob purple"></div>
+    </div>
 
-    document.querySelector('#upload-area button').addEventListener('click', function() {
-      document.getElementById('id_image').click();
-    });
-  </script>
+    <div class="container">
+        <div class="create-post-card">
+            <div class="create-post-header">
+                <a href="{% url 'feed:home' %}" class="back-button"><i class="fas fa-arrow-left"></i></a>
+                <h2>Create Post</h2>
+            </div>
+
+            <div class="create-post-body">
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <div class="form-group">
+                        <label>1. Upload Photo</label>
+                        <label id="upload-area" for="id_image">
+                            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                            <div class="upload-area-text">Click to browse</div>
+                            <span class="upload-area-subtext">Photos Only...</span>
+                        </label>
+                        <input type="file" id="id_image" name="image" required style="display: none;">
+                        
+                        <div id="preview-container">
+                            <img id="preview-image" class="preview-image" alt="Image Preview"/>
+                            <button type="button" id="change-photo-btn" class="btn-change-photo">Change Photo</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_caption">2. Write a Caption</label>
+                        <textarea id="id_caption" name="caption" placeholder="Tell us about your photo..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>3. Set Visibility</label>
+                        <div class="visibility-toggle-group">
+                            <span class="toggle-label">
+                                <i class="fas fa-globe-americas"></i>
+                                <span>Make this post public</span>
+                            </span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="id_is_public" name="is_public" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-post">
+                        Share Post
+                        <span class="arrow">&rarr;</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <nav>
+        <a href="{% url 'feed:home' %}"><i class="fas fa-home"></i> <span>Home</span></a>
+        <a href="{% url 'feed:explore' %}"><i class="fas fa-compass"></i> <span>Explore</span></a>
+        <a href="{% url 'feed:create_post' %}" class="active-link"><i class="fas fa-plus-circle"></i> <span>Post</span></a>
+        <a href="{% url 'feed:friends_list' %}"><i class="fas fa-user-friends"></i> <span>Network</span></a>
+        <a href="{% url 'chat:inbox' %}"><i class="fas fa-comment"></i> <span>Chat</span></a>
+    </nav>
+
+    <script>
+        // --- UPDATED Loader Script from Landing Page ---
+        window.addEventListener('load', () => {
+            const loader = document.getElementById('loaderContainer');
+            
+            setTimeout(() => {
+                loader.style.opacity = '0';
+                loader.addEventListener('transitionend', () => {
+                    loader.style.visibility = 'hidden';
+                }, { once: true });
+            }, 1000); // Minimum 1-second display time
+        });
+        
+        // --- Image Preview Script (Unchanged) ---
+        const imageInput = document.getElementById('id_image');
+        const uploadArea = document.getElementById('upload-area');
+        const previewContainer = document.getElementById('preview-container');
+        const previewImage = document.getElementById('preview-image');
+        const changePhotoButton = document.getElementById('change-photo-btn');
+
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    previewImage.src = event.target.result;
+                    uploadArea.style.display = 'none';
+                    previewContainer.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        changePhotoButton.addEventListener('click', function() {
+            imageInput.value = ''; 
+            uploadArea.style.display = 'block';
+            previewContainer.style.display = 'none';
+            uploadArea.click();
+        });
+
+    </script>
 </body>
 </html>
