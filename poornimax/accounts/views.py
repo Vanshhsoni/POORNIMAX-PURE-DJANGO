@@ -93,8 +93,11 @@ from .models import User # Make sure to import your User model
 
 # This is assumed to be a temporary in-memory store.
 # For production, consider using request.session or a cache like Redis.
-otp_store = {}
+from django.core.mail import EmailMultiAlternatives
+from django.conf import settings
+import random
 
+otp_store = {}
 
 def login_access(request):
     if request.method == 'POST':
@@ -104,13 +107,41 @@ def login_access(request):
             otp = str(random.randint(100000, 999999))
             otp_store[email] = otp
 
-            send_mail(
+            # HTML content with blue theme
+            html_content = f"""
+            <html>
+                <body style="font-family: Arial, sans-serif; background-color: #f4f8fb; padding: 20px;">
+                    <div style="max-width: 500px; margin: auto; background: white; border-radius: 8px; 
+                                padding: 20px; border: 1px solid #d9eaf7;">
+                        <h2 style="color: #1e88e5; text-align: center;">PoornimaX Login OTP</h2>
+                        <p style="font-size: 16px; color: #333;">
+                            Hello <b>{user.first_name}</b>,<br><br>
+                            Your One-Time Password (OTP) for login is:
+                        </p>
+                        <div style="background-color: #e3f2fd; padding: 15px; text-align: center; 
+                                    font-size: 24px; font-weight: bold; color: #1e88e5; 
+                                    border-radius: 6px;">
+                            {otp}
+                        </div>
+                        <p style="font-size: 14px; color: #666; margin-top: 20px;">
+                            This OTP will be valid for the next 5 minutes. Do not share it with anyone.
+                        </p>
+                    </div>
+                </body>
+            </html>
+            """
+
+            # Fallback plain text
+            text_content = f"Your PoornimaX OTP is: {otp}"
+
+            msg = EmailMultiAlternatives(
                 subject="Your PoornimaX OTP",
-                message=f"Your OTP is: {otp}",
+                body=text_content,
                 from_email=settings.EMAIL_HOST_USER,
-                recipient_list=[email],
-                fail_silently=False
+                to=[email]
             )
+            msg.attach_alternative(html_content, "text/html")
+            msg.send()
 
             return render(request, 'accounts/login.html', {
                 'show_otp': True,
@@ -122,6 +153,7 @@ def login_access(request):
             return redirect('accounts:load_login')
 
     return render(request, 'accounts/login.html')
+
 
 
 def verify_otp(request):
