@@ -9,6 +9,7 @@
     <script src="https://kit.fontawesome.com/b8b432d7d3.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
     <style>
         /* --- Blue & White Theme --- */
         :root {
@@ -106,29 +107,32 @@
         
         .post-header { padding: 15px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
         .post-user-img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+        .post-username { font-weight: 600; font-size: 14px; }
+        .post-time { font-size: 12px; color: var(--text-light); }
         .post-caption { padding: 15px; border-bottom: 1px solid var(--border); font-size: 14px; line-height: 1.5; }
         
         .comments-container { overflow-y: auto; /* This section will scroll if content overflows */ padding: 15px; }
         .comment { display: flex; gap: 10px; margin-bottom: 15px; align-items: flex-start; }
         .comment-user-img { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; object-fit: cover; background-color: var(--bg-card); }
+        .comment-content { flex: 1; }
         .comment-username { font-weight: 600; font-size: 13px; margin-bottom: 2px; }
         .comment-text { font-size: 14px; line-height: 1.5; word-wrap: break-word; }
         .comment-time { font-size: 11px; color: var(--text-light); margin-top: 4px; }
         
-        .post-actions { padding: 15px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 15px; background: var(--bg-card); }
+        .post-actions { padding: 15px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 15px; background: var(--bg); z-index: 99999; }
         .action-buttons { display: flex; align-items: center; gap: 15px; }
         .action-btn { font-size: 22px; color: var(--text-light); cursor: pointer; transition: var(--transition); }
         .action-btn:hover { color: var(--text); transform: scale(1.1); }
         .like-btn.active { color: var(--danger); }
         .like-count { font-size: 14px; font-weight: 500; }
         
-        .comment-form { display: flex; gap: 10px; }
-        .comment-input { flex-grow: 1; border: 1px solid var(--border); background: var(--bg); color: var(--text); border-radius: 20px; padding: 8px 15px; font-size: 14px; outline: none; transition: var(--transition); }
+        .comment-form { display: flex; gap: 10px;  }
+        .comment-input { flex-grow: 1; border: 1px solid var(--border); background: var(--bg-card); color: var(--text); border-radius: 20px; padding: 8px 15px; font-size: 14px; outline: none; transition: var(--transition); }
         .comment-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15); }
         .comment-submit-btn { padding: 8px 15px; border-radius: 20px; background-color: var(--primary); color: white; font-weight: 500; }
         .comment-submit-btn:hover { background-color: var(--primary-light); }
         
-        .close-overlay { position: absolute; top: 12px; right: 12px; width: 32px; height: 32px; background: rgba(0, 0, 0, 0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; cursor: pointer; transition: var(--transition); z-index: 20; }
+        .close-overlay { position: absolute; top: 15px; right: 15px; width: 32px; height: 32px; background: rgba(0, 0, 0, 0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; cursor: pointer; transition: var(--transition); z-index: 20; }
         .close-overlay:hover { background: rgba(0, 0, 0, 0.6); transform: rotate(90deg); }
 
         /* Animations */
@@ -141,7 +145,7 @@
             position: fixed; bottom: 0; left: 0; width: 100%;
             background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
             display: flex; justify-content: space-around; padding: 0.5rem 0;
-            border-top: 1px solid var(--border-color); z-index: 1000;
+            border-top: 1px solid var(--border); z-index: 10;
         }
         nav a { 
             display: flex; flex-direction: column; align-items: center; color: var(--text-light);
@@ -152,14 +156,30 @@
         nav a.active-link { color: var(--primary); }
         nav a:active { transform: scale(0.95); }
 
-
         /* Responsive Design */
-        @media(max-width: 992px) { .profile-body { grid-template-columns: 1fr; } }
+        @media(max-width: 992px) { 
+            .profile-body { grid-template-columns: 1fr; } 
+        }
         @media (max-width: 768px) {
             .post-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
             .post-overlay-content { grid-template-columns: 1fr; height: 95vh; width: 100%; border-radius: 0; }
-            .post-image-container { height: 60vh; }
+            .post-image-container { height: 40vh; }
+            .post-details { grid-template-rows: auto 1fr auto; }
+            .post-caption { display: none; }
             .close-overlay { top: 15px; right: 15px; color: var(--text); background: var(--bg-card); }
+        }
+
+        /* Loading state for buttons */
+        .heart-btn.loading {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        .heart-btn.loading i {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -186,14 +206,17 @@
                             <div class="compatibility-label">Compatibility</div>
                         </div>
                         <div id="crushActionContainer">
-                            <form method="POST" action="{% url 'feed:crush_action_profile' profile_user.id %}" id="crushForm">
-                                {% csrf_token %}
-                                {% if is_mutual %}<button type="submit" name="crush_action" value="uncrush" class="heart-btn btn-mutual"><i class="fas fa-heart"></i> Mutual Crush</button>
-                                {% elif sent_crush %}<button type="submit" name="crush_action" value="uncrush" class="heart-btn btn-sent"><i class="fas fa-heart-crack"></i> Crush Sent</button>
-                                {% elif received_crush %}<button type="submit" name="crush_action" value="accept_crush" class="heart-btn btn-received"><i class="fas fa-heart-pulse"></i> Crush Back</button>
-                                {% else %}<button type="submit" name="crush_action" value="send_crush" class="heart-btn btn-send"><i class="far fa-heart"></i> Send Crush</button>
+                            <div id="crushButtonContainer">
+                                {% if is_mutual %}
+                                    <button type="button" class="heart-btn btn-mutual" data-action="uncrush"><i class="fas fa-heart"></i> Mutual Crush</button>
+                                {% elif sent_crush %}
+                                    <button type="button" class="heart-btn btn-sent" data-action="uncrush"><i class="fas fa-heart-crack"></i> Crush Sent</button>
+                                {% elif received_crush %}
+                                    <button type="button" class="heart-btn btn-received" data-action="accept_crush"><i class="fas fa-heart-pulse"></i> Crush Back</button>
+                                {% else %}
+                                    <button type="button" class="heart-btn btn-send" data-action="send_crush"><i class="far fa-heart"></i> Send Crush</button>
                                 {% endif %}
-                            </form>
+                            </div>
                             <a href="{% url 'chat:chat_with_user' profile_user.username %}" class="btn btn-message" id="messageButton" {% if not is_mutual %}style="display: none;"{% endif %}><i class="fas fa-comment"></i> Message</a>
                         </div>
                     {% endif %}
@@ -325,11 +348,11 @@
                         const commentEl = document.createElement('div');
                         commentEl.className = 'comment';
                         commentEl.innerHTML = `
-                            <img src="${comment.user_image}" alt="${comment.username}" class="comment-user-img">
+                            <a href="#"><img src="${comment.user_image}" alt="${comment.username}" class="comment-user-img"></a>
                             <div class="comment-content">
-                                <span class="comment-username">${comment.username}</span>
+                                <a href="#"><span class="comment-username">${comment.username}</span></a>
                                 <p class="comment-text">${comment.content}</p>
-                                <div class="comment-time">${comment.time}</div>
+                                <div class="comment-time">${moment(comment.created_at).fromNow()}</div>
                             </div>`;
                         commentsContainer.appendChild(commentEl);
                     });
@@ -397,20 +420,126 @@
                         const noCommentsEl = commentsContainer.querySelector('p');
                         if (noCommentsEl) noCommentsEl.remove();
 
+                        const newComment = data.comment;
                         const commentEl = document.createElement('div');
                         commentEl.className = 'comment new-comment-animation';
                         commentEl.innerHTML = `
-                            <img src="${data.comment.user_image}" alt="${data.comment.username}" class="comment-user-img">
+                            <img src="${newComment.user.profile_picture_url}" alt="${newComment.user.username}" class="comment-user-img">
                             <div class="comment-content">
-                                <span class="comment-username">${data.comment.username}</span>
-                                <p class="comment-text">${data.comment.content}</p>
-                                <div class="comment-time">${data.comment.time}</div>
+                                <span class="comment-username">${newComment.user.username}</span>
+                                <p class="comment-text">${newComment.content}</p>
+                                <div class="comment-time">${moment(newComment.created_at).fromNow()}</div>
                             </div>`;
                         
-                        commentsContainer.insertBefore(commentEl, commentsContainer.firstChild);
+                        commentsContainer.prepend(commentEl);
                         contentInput.value = '';
                     }
                 } catch (error) { console.error('Comment Action Error:', error); }
+            });
+        }
+
+        // --- FIXED: AJAX Crush Button Handler ---
+        const crushButtonContainer = document.getElementById('crushButtonContainer');
+        if (crushButtonContainer) {
+            crushButtonContainer.addEventListener('click', async function(e) {
+                if (e.target.matches('button[data-action]') || e.target.closest('button[data-action]')) {
+                    e.preventDefault();
+                    
+                    const button = e.target.matches('button[data-action]') ? e.target : e.target.closest('button[data-action]');
+                    const action = button.getAttribute('data-action');
+                    
+                    // Add loading state
+                    button.classList.add('loading');
+                    const originalHTML = button.innerHTML;
+                    button.innerHTML = '<i class="fas fa-spinner"></i> Processing...';
+                    
+                    try {
+                        // Create FormData with the correct parameter name
+                        const formData = new FormData();
+                        formData.append('crush_action', action);
+                        
+                        const response = await fetch(`{% url 'feed:crush_action_profile' profile_user.id %}`, {
+                            method: 'POST',
+                            body: formData,
+                            headers: { 
+                                'X-CSRFToken': csrftoken, 
+                                'X-Requested-With': 'XMLHttpRequest' 
+                            }
+                        });
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        
+                        const data = await response.json();
+                        
+                        if (data.status === 'ok') {
+                            // Update button based on new state
+                            const messageButton = document.getElementById('messageButton');
+                            const postsSection = document.querySelector('.posts-section');
+                            const privatePostsMessage = document.getElementById('privatePostsMessage');
+                            const privateMessageStatus = document.getElementById('privateMessageStatus');
+
+                            let newButtonHTML = '';
+                            let newButtonClass = '';
+                            let newButtonAction = '';
+
+                            if (data.is_mutual) {
+                                newButtonHTML = '<i class="fas fa-heart"></i> Mutual Crush';
+                                newButtonClass = 'heart-btn btn-mutual';
+                                newButtonAction = 'uncrush';
+                                if (messageButton) messageButton.style.display = 'flex';
+                                if (postsSection) postsSection.style.display = 'block';
+                                if (privatePostsMessage) privatePostsMessage.style.display = 'none';
+                            } else if (data.sent_crush) {
+                                newButtonHTML = '<i class="fas fa-heart-crack"></i> Crush Sent';
+                                newButtonClass = 'heart-btn btn-sent';
+                                newButtonAction = 'uncrush';
+                                if (privateMessageStatus) privateMessageStatus.textContent = "You've sent a crush. Waiting for them to accept.";
+                                if (messageButton) messageButton.style.display = 'none';
+                                if (postsSection) postsSection.style.display = 'none';
+                                if (privatePostsMessage) privatePostsMessage.style.display = 'block';
+                            } else if (data.received_crush) {
+                                newButtonHTML = '<i class="fas fa-heart-pulse"></i> Crush Back';
+                                newButtonClass = 'heart-btn btn-received';
+                                newButtonAction = 'accept_crush';
+                                if (privateMessageStatus) privateMessageStatus.textContent = "They sent you a crush. Crush back to connect!";
+                                if (messageButton) messageButton.style.display = 'none';
+                                if (postsSection) postsSection.style.display = 'none';
+                                if (privatePostsMessage) privatePostsMessage.style.display = 'block';
+                            } else {
+                                newButtonHTML = '<i class="far fa-heart"></i> Send Crush';
+                                newButtonClass = 'heart-btn btn-send';
+                                newButtonAction = 'send_crush';
+                                if (privateMessageStatus) privateMessageStatus.textContent = "Send a crush to connect!";
+                                if (messageButton) messageButton.style.display = 'none';
+                                if (postsSection) postsSection.style.display = 'none';
+                                if (privatePostsMessage) privatePostsMessage.style.display = 'block';
+                            }
+
+                            // Update the button
+                            button.className = newButtonClass;
+                            button.setAttribute('data-action', newButtonAction);
+                            button.innerHTML = newButtonHTML;
+                            
+                        } else {
+                            // Handle error response
+                            console.error('Server error:', data.message);
+                            alert('Error: ' + (data.message || 'Something went wrong'));
+                            // Restore original button state
+                            button.innerHTML = originalHTML;
+                        }
+                        
+                    } catch (error) {
+                        console.error('Crush Action Error:', error);
+                        alert('Network error. Please try again.');
+                        // Restore original button state
+                        button.innerHTML = originalHTML;
+                    } finally {
+                        // Remove loading state
+                        button.classList.remove('loading');
+                    }
+                }
             });
         }
     });

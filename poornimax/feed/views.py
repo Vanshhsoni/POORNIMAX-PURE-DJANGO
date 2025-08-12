@@ -432,6 +432,8 @@ def crush_action(request, user_id):
         })
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
+
+
 @login_required
 def crush_action_profile(request, user_id):
     """
@@ -448,6 +450,8 @@ def crush_action_profile(request, user_id):
         return JsonResponse({'status': 'error', 'message': 'You cannot perform this action on yourself.'}, status=403)
 
     action = request.POST.get('crush_action')
+    if action not in ['send_crush', 'accept_crush', 'uncrush']:
+        return JsonResponse({'status': 'error', 'message': 'Invalid crush action'}, status=400)
 
     # --- Crush Logic (This remains the same) ---
     if action == 'send_crush':
@@ -464,11 +468,14 @@ def crush_action_profile(request, user_id):
             sent_crush_obj.is_mutual = True; received_crush_obj.is_mutual = True
             sent_crush_obj.save(); received_crush_obj.save()
     elif action == 'uncrush':
-        Crush.objects.filter(sender=current_user, receiver=profile_user).delete()
+        crush_to_delete = Crush.objects.filter(sender=current_user, receiver=profile_user).first()
+        if crush_to_delete:
+            crush_to_delete.delete()
         received_crush_obj = Crush.objects.filter(sender=profile_user, receiver=current_user).first()
         if received_crush_obj:
-            received_crush_obj.is_mutual = False; received_crush_obj.save()
-    
+            received_crush_obj.is_mutual = False
+            received_crush_obj.save()
+
     # --- Re-fetch current status ---
     is_mutual = Crush.objects.filter(sender=request.user, receiver=profile_user, is_mutual=True).exists()
     sent_crush = Crush.objects.filter(sender=request.user, receiver=profile_user).exists()

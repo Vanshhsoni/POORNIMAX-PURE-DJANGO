@@ -1,0 +1,13 @@
+
+--- Chat history deleted by Vanshh_soni on 2025-08-12 04:10:49.862032+00:00 ---
+[2025-08-12 04:02:37.369485+00:00] Vanshh_soni → sinigami: Oi
+[2025-08-12 04:09:33.529277+00:00] sinigami → Vanshh_soni: Hii
+[2025-08-12 04:09:39.383956+00:00] Vanshh_soni → sinigami: Kya haal chaal?
+[2025-08-12 04:09:44.828196+00:00] sinigami → Vanshh_soni: Badiya
+[2025-08-12 04:09:50.722811+00:00] Vanshh_soni → sinigami: Hmm …
+[2025-08-12 04:10:00.437943+00:00] sinigami → Vanshh_soni: Gand
+[2025-08-12 04:10:06.656339+00:00] Vanshh_soni → sinigami: So, realtime chatting is working right …
+[2025-08-12 04:10:07.964912+00:00] sinigami → Vanshh_soni: Grand vitara
+[2025-08-12 04:10:14.067466+00:00] sinigami → Vanshh_soni: Yes
+[2025-08-12 04:10:24.012281+00:00] Vanshh_soni → sinigami: Don't use abusive words , database me save hora hai sab
+
